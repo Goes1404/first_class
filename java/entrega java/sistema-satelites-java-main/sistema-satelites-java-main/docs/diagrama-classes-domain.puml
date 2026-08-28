@@ -1,0 +1,82 @@
+@startuml
+title Diagrama de Classes - Domain
+
+class EntidadeBase {
+  - int id
+  + EntidadeBase()
+  + EntidadeBase(int id)
+  + getId() : int
+  + setId(int id) : void
+  + possuiId() : boolean
+  + exibirResumo() : String
+}
+
+class Satelite {
+  - String nome
+  - String status
+  - double altitudeKm
+  + Satelite()
+  + Satelite(int id, String nome, String status, double altitudeKm)
+  + calcularPrioridadeOperacional() : int
+  + mostrarSituacao() : String
+  + mostrarSituacao(String observacao) : String
+  + exibirResumo() : String
+}
+
+class SateliteComunicacao {
+  - int quantidadeAntenas
+  + SateliteComunicacao()
+  + SateliteComunicacao(int id, String nome, String status, double altitudeKm, int quantidadeAntenas)
+  + calcularPrioridadeOperacional() : int
+  + exibirResumo() : String
+}
+
+class SateliteObservacao {
+  - String areaMonitorada
+  + SateliteObservacao()
+  + SateliteObservacao(int id, String nome, String status, double altitudeKm, String areaMonitorada)
+  + calcularPrioridadeOperacional() : int
+  + exibirResumo() : String
+}
+
+class Missao {
+  - String nome
+  - String objetivo
+  - int sateliteId
+  + Missao()
+  + Missao(int id, String nome, String objetivo, int sateliteId)
+  + exibirResumo() : String
+}
+
+class LeituraSensor {
+  - int sateliteId
+  - String tipo
+  - double valor
+  - String unidade
+  + LeituraSensor()
+  + LeituraSensor(int id, int sateliteId, String tipo, double valor, String unidade)
+  + estaEmRisco() : boolean
+  + exibirResumo() : String
+}
+
+class AlertaOrbital {
+  - int sateliteId
+  - String descricao
+  - boolean ativo
+  + AlertaOrbital()
+  + AlertaOrbital(int id, int sateliteId, String descricao, boolean ativo)
+  + exibirResumo() : String
+}
+
+EntidadeBase <|-- Satelite
+EntidadeBase <|-- Missao
+EntidadeBase <|-- LeituraSensor
+EntidadeBase <|-- AlertaOrbital
+Satelite <|-- SateliteComunicacao
+Satelite <|-- SateliteObservacao
+
+Satelite "1" -- "0..*" Missao : executa
+Satelite "1" -- "0..*" LeituraSensor : gera
+Satelite "1" -- "0..*" AlertaOrbital : possui
+
+@enduml
