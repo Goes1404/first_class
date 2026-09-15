@@ -103,14 +103,11 @@ export const Header: React.FC = () => {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex items-center justify-between gap-4">
         {/* Marca */}
-        <Link to="/" className="flex items-center gap-2 shrink-0 min-w-0">
-          <Zap className="h-6 w-6 text-blue-600 fill-blue-600 shrink-0" aria-hidden="true" />
-          <span className="flex flex-col leading-none min-w-0">
-            <span className="text-lg font-extrabold tracking-tight text-slate-900 truncate">{STORE.name}</span>
-            <span className="hidden sm:block mt-0.5 text-[9px] font-semibold tracking-[0.25em] text-blue-600">
-              ACESSÓRIOS · TECNOLOGIA
-            </span>
+        <Link to="/" className="flex shrink-0 flex-col leading-none min-w-0">
+          <span className="truncate text-[11px] font-extrabold uppercase tracking-[0.26em] text-slate-900">
+            {STORE.name}
           </span>
+          <span className="mt-1 hidden text-[11px] font-medium text-slate-500 sm:block">Acessórios · Tecnologia</span>
         </Link>
 
         {/* Navegação desktop — um sublinhado só, que desliza entre os links */}
