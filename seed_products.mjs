@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = "https://kpjmjwxcpzcipcxunthq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_l-gG5346vDMdZ9qPaoYx2g_OqTfKdTL";
+// Credenciais vêm do ambiente. Este arquivo já teve a SENHA do admin escrita
+// aqui dentro, num repositório público — troque essa senha no Supabase.
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
+
+if (!SUPABASE_URL || !SUPABASE_KEY || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('Defina VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, SEED_ADMIN_EMAIL e SEED_ADMIN_PASSWORD.');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -30,8 +39,8 @@ const products = [
 
 async function seed() {
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-    email: 'sq3junior@gmail.com',
-    password: 'Salmos121@',
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD,
   });
 
   if (authError) {
