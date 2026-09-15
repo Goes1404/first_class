@@ -8,6 +8,12 @@ import { useProductRatings } from '@/hooks/useProductRatings';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import type { CollectionGroup } from '@/lib/catalogGroups';
+import { motion } from 'framer-motion';
+import { Stagger, StaggerItem } from '@/components/animations/Stagger';
+import { Pop } from '@/components/animations/Pop';
+import { cardHover, cardTap, spring } from '@/lib/motion';
+
+const MotionLink = motion(Link);
 
 const ALL = '__todos__';
 
@@ -53,7 +59,9 @@ const CollectionCard: React.FC<{
   slug: string;
   rating?: { avg_rating: number; review_count: number };
 }> = ({ product, slug, rating }) => (
-  <Link
+  <MotionLink
+    whileHover={cardHover}
+    whileTap={cardTap}
     to={`/${slug}/${product.id}`}
     className="w-[156px] shrink-0 rounded-2xl border border-slate-200 bg-white p-3 hover:border-blue-300 hover:shadow-lg transition-all"
   >
@@ -81,7 +89,7 @@ const CollectionCard: React.FC<{
         </span>
       )}
     </div>
-  </Link>
+  </MotionLink>
 );
 
 /* ─── Página ───────────────────────────────────────────────────────────── */
@@ -179,11 +187,14 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
               <span className="block text-blue-600">{group.headline[1]}</span>
             </h1>
             {featured?.image && (
-              <img
+              <motion.img
                 src={featured.image}
                 alt=""
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 my-auto right-[-10px] w-[190px] max-w-[52%] max-h-[104px] object-contain -rotate-[7deg] drop-shadow-xl"
+                style={{ rotate: -7 }}
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="pointer-events-none absolute inset-y-0 my-auto right-[-10px] w-[190px] max-w-[52%] max-h-[104px] object-contain drop-shadow-xl"
               />
             )}
           </div>
@@ -198,7 +209,8 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
             <div className="flex items-baseline justify-between">
               <h2 className="text-base font-bold text-slate-900">Marcas</h2>
             </div>
-            <div className="flex gap-3.5 overflow-x-auto pt-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Stagger gap={0.05} className="flex gap-3.5 overflow-x-auto pt-3 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <StaggerItem kind="scale" className="shrink-0">
               <button
                 type="button"
                 onClick={() => setBrand(ALL)}
@@ -218,16 +230,18 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
                   Todas
                 </span>
               </button>
+              </StaggerItem>
               {brands.map((b) => (
+                <StaggerItem kind="scale" key={b.name} className="shrink-0">
                 <BrandCircle
-                  key={b.name}
                   name={b.name}
                   logo={b.logo}
                   active={brand === b.name}
                   onClick={() => setBrand(brand === b.name ? ALL : b.name)}
                 />
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </section>
         )}
 
@@ -238,9 +252,11 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
               const on = p.id === category;
               const empty = p.count === 0 && !on;
               return (
-                <button
+                <motion.button
                   key={p.id}
                   type="button"
+                  whileTap={{ scale: 0.94 }}
+                  transition={spring.snappy}
                   onClick={() => setCategory(p.id)}
                   aria-pressed={on}
                   className={`h-11 pl-4 pr-2 rounded-full text-[13px] font-semibold shrink-0 flex items-center gap-2 border transition-all ${
@@ -257,7 +273,7 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
                   >
                     {p.count}
                   </span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -279,11 +295,13 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
                 className="absolute top-2 right-2 h-11 w-11 flex items-center justify-center bg-transparent border-0 p-0 cursor-pointer"
               >
                 <span className="h-[34px] w-[34px] rounded-full bg-white shadow flex items-center justify-center">
-                  <Heart
-                    className={`h-[17px] w-[17px] ${
-                      isInWishlist(featured.id) ? 'text-rose-600 fill-rose-600' : 'text-slate-400'
-                    }`}
-                  />
+                  <Pop value={String(isInWishlist(featured.id))} className="flex">
+                    <Heart
+                      className={`h-[17px] w-[17px] ${
+                        isInWishlist(featured.id) ? 'text-rose-600 fill-rose-600' : 'text-slate-400'
+                      }`}
+                    />
+                  </Pop>
                 </span>
               </button>
               <Link to={`/${group.slug}/${featured.id}`} className="block">
@@ -334,9 +352,9 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
             <div className="flex gap-3 pt-3 overflow-hidden" aria-busy="true">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="w-[156px] shrink-0 rounded-2xl border border-slate-200 p-3">
-                  <div className="h-4 w-4/5 rounded bg-slate-100 animate-pulse" />
-                  <div className="h-[74px] mt-3 rounded-xl bg-slate-100 animate-pulse" />
-                  <div className="h-4 w-1/2 mt-3 rounded bg-slate-100 animate-pulse" />
+                  <div className="h-4 w-4/5 rounded skeleton" />
+                  <div className="h-[74px] mt-3 rounded-xl skeleton" />
+                  <div className="h-4 w-1/2 mt-3 rounded skeleton" />
                 </div>
               ))}
             </div>
@@ -349,11 +367,13 @@ export const CollectionTab: React.FC<{ group: CollectionGroup }> = ({ group }) =
           )}
 
           {!isLoading && !isError && shown.length > 0 && (
-            <div className="flex gap-3 pt-3 pb-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Stagger className="flex gap-3 pt-3 pb-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {shown.map((p) => (
-                <CollectionCard key={p.id} product={p} slug={group.slug} rating={ratings?.[p.id]} />
+                <StaggerItem key={p.id} className="shrink-0">
+                  <CollectionCard product={p} slug={group.slug} rating={ratings?.[p.id]} />
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           )}
 
           {!isLoading && !isError && shown.length === 0 && (

@@ -4,6 +4,9 @@ import {
   ArrowLeft, Heart, Minus, Plus, ShoppingBag, ImageOff, Star, Share2, Check,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Pop } from '@/components/animations/Pop';
+import { spring } from '@/lib/motion';
 import { useProduct } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { useCart } from '@/contexts/CartContext';
@@ -61,10 +64,10 @@ const ApparelPurchase: React.FC = () => {
     return (
       <div className="min-h-screen bg-white p-4" aria-busy="true">
         <div className="mx-auto max-w-md space-y-4">
-          <div className="h-11 w-11 rounded-full bg-slate-100 animate-pulse" />
-          <div className="aspect-[4/5] rounded-3xl bg-slate-100 animate-pulse" />
-          <div className="h-6 w-2/3 rounded bg-slate-100 animate-pulse" />
-          <div className="h-14 rounded-2xl bg-slate-100 animate-pulse" />
+          <div className="h-11 w-11 rounded-full skeleton" />
+          <div className="aspect-[4/5] rounded-3xl skeleton" />
+          <div className="h-6 w-2/3 rounded skeleton" />
+          <div className="h-14 rounded-2xl skeleton" />
         </div>
       </div>
     );
@@ -119,7 +122,18 @@ const ApparelPurchase: React.FC = () => {
       <div className="relative mx-auto max-w-md">
         <div className="relative aspect-[4/5] bg-slate-50 overflow-hidden">
           {gallery[shot] ? (
-            <img src={gallery[shot]} alt={product.name} className="h-full w-full object-cover" />
+            <AnimatePresence initial={false}>
+              <motion.img
+                key={shot}
+                src={gallery[shot]}
+                alt={product.name}
+                className="absolute inset-0 h-full w-full object-cover"
+                initial={{ opacity: 0, scale: 1.04 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35 }}
+              />
+            </AnimatePresence>
           ) : (
             <div className="h-full w-full flex items-center justify-center">
               <ImageOff className="h-10 w-10 text-slate-300" aria-hidden="true" />
@@ -208,7 +222,9 @@ const ApparelPurchase: React.FC = () => {
             aria-label={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
             className="h-11 w-11 shrink-0 rounded-full border border-slate-200 flex items-center justify-center hover:border-slate-400 transition-colors"
           >
-            <Heart className={`h-5 w-5 ${fav ? 'text-rose-600 fill-rose-600' : 'text-slate-900'}`} />
+            <Pop value={String(fav)} className="flex">
+              <Heart className={`h-5 w-5 ${fav ? 'text-rose-600 fill-rose-600' : 'text-slate-900'}`} />
+            </Pop>
           </button>
         </div>
 
@@ -218,9 +234,11 @@ const ApparelPurchase: React.FC = () => {
             <span className="text-sm font-bold text-slate-900">Escolha o tamanho</span>
             <div className="mt-2.5 flex flex-wrap gap-2">
               {sizes.map((s) => (
-                <button
+                <motion.button
                   key={s}
                   type="button"
+                  whileTap={{ scale: 0.94 }}
+                  transition={spring.snappy}
                   onClick={() => setSize(s)}
                   aria-pressed={size === s}
                   className={`min-w-[52px] h-11 px-3 rounded-full text-sm font-semibold border transition-all ${
@@ -230,7 +248,7 @@ const ApparelPurchase: React.FC = () => {
                   }`}
                 >
                   {s}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>

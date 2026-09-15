@@ -1,5 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { cardHover, cardTap } from '@/lib/motion';
+
+const MotionLink = motion(Link);
 import { Star, ShoppingCart, ImageOff } from 'lucide-react';
 import { Product } from '@/types/database';
 import { useCart } from '@/contexts/CartContext';
@@ -26,11 +30,11 @@ const brl = (v: number) =>
 
 export const TechProductCardSkeleton: React.FC = () => (
   <div className="rounded-2xl bg-white border border-slate-200 p-3">
-    <div className="aspect-square rounded-xl bg-slate-100 animate-pulse" />
+    <div className="aspect-square rounded-xl skeleton" />
     <div className="mt-3 space-y-2">
-      <div className="h-3 w-4/5 rounded bg-slate-100 animate-pulse" />
-      <div className="h-3 w-1/2 rounded bg-slate-100 animate-pulse" />
-      <div className="h-5 w-2/3 rounded bg-slate-100 animate-pulse" />
+      <div className="h-3 w-4/5 rounded skeleton" />
+      <div className="h-3 w-1/2 rounded skeleton" />
+      <div className="h-5 w-2/3 rounded skeleton" />
     </div>
   </div>
 );
@@ -49,7 +53,9 @@ export const TechProductCard: React.FC<Props> = ({ product, rating, badge }) => 
   };
 
   return (
-    <Link
+    <MotionLink
+      whileHover={cardHover}
+      whileTap={cardTap}
       to={`/produto/${product.id}`}
       onPointerEnter={() => preloadProductDetails()}
       onTouchStart={() => preloadProductDetails()}
@@ -107,6 +113,6 @@ export const TechProductCard: React.FC<Props> = ({ product, rating, badge }) => 
       {outOfStock && (
         <span className="mt-1 text-[10px] font-semibold text-slate-400">Esgotado</span>
       )}
-    </Link>
+    </MotionLink>
   );
 };

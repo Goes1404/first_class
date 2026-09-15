@@ -6,6 +6,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { preloadProducts } from '@/lib/preloadRoutes';
 import { TechProductCard, TechProductCardSkeleton } from './TechProductCard';
+import { Stagger, StaggerItem } from '@/components/animations/Stagger';
 import type { BadgeKind } from './techTheme';
 
 const LIMIT = 6;
@@ -74,16 +75,13 @@ export const TechTrending: React.FC = () => {
         )}
 
         {shown.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {shown.map((p, i) => (
-              <TechProductCard
-                key={p.id}
-                product={p}
-                rating={ratings?.[p.id]}
-                badge={badgeFor(p, i)}
-              />
+              <StaggerItem key={p.id}>
+                <TechProductCard product={p} rating={ratings?.[p.id]} badge={badgeFor(p, i)} />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         )}
       </div>
     </section>

@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { preloadProducts } from "@/lib/preloadRoutes";
+import { AnimatePresence, motion } from "framer-motion";
+import { easing } from "@/lib/motion";
 
 interface Slide {
   eyebrow: string;
@@ -98,14 +100,23 @@ export const TechHero: React.FC = () => {
           />
 
           <div className="relative z-10 p-6 sm:p-8 max-w-md">
+            {/* O texto do slide entra pela direita e sai pela esquerda. */}
+            <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.32, ease: easing.smooth }}
+            >
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">
               {slide.eyebrow}
             </span>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight text-white">
+            <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight text-white">
               {slide.title}
               <br />
               <span className="text-blue-400">{slide.highlight}</span>
-            </h2>
+            </h1>
             <p className="mt-3 text-sm text-slate-300 leading-relaxed">
               {slide.text}
             </p>
@@ -118,6 +129,8 @@ export const TechHero: React.FC = () => {
               {slide.cta}
               <ArrowRight className="h-4 w-4" />
             </Link>
+            </motion.div>
+            </AnimatePresence>
 
             {/* Indicadores — em fluxo, logo abaixo do CTA, para nunca cobri-lo.
                 O botão preserva os 44px de alvo de toque (WCAG 2.5.5, regra

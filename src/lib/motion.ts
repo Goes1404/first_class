@@ -40,3 +40,42 @@ export const easing = {
   expo: [0.16, 1, 0.3, 1] as const,
   brand: [0.77, 0, 0.18, 1] as const,
 };
+
+/* ─── Sistema de movimento compartilhado ─────────────────────────────────────
+   Uma vocabulário só para o site inteiro: molas com a mesma "personalidade",
+   e variantes de entrada que os componentes reutilizam em vez de improvisar.
+   `MotionConfig reducedMotion="user"` no App faz tudo isto respeitar o
+   sistema operacional sem cada componente checar por conta própria. */
+
+import type { Transition, Variants } from 'framer-motion';
+
+export const spring = {
+  /** Toques e seleções: responde rápido, quase sem oscilar. */
+  snappy: { type: 'spring', stiffness: 520, damping: 32, mass: 0.8 } as Transition,
+  /** Elementos que deslizam de lugar (indicador de aba, layout). */
+  soft: { type: 'spring', stiffness: 260, damping: 28 } as Transition,
+  /** Badge que "pula" ao mudar de valor. */
+  pop: { type: 'spring', stiffness: 700, damping: 22 } as Transition,
+} as const;
+
+/** Container que escalona a entrada dos filhos. */
+export const staggerContainer = (delay = 0, gap = 0.06): Variants => ({
+  hidden: {},
+  show: { transition: { delayChildren: delay, staggerChildren: gap } },
+});
+
+/** Item de entrada: sobe 14px e aparece. */
+export const staggerItem: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: easing.smooth } },
+};
+
+/** Entrada por escala — para chips e círculos. */
+export const staggerScale: Variants = {
+  hidden: { opacity: 0, scale: 0.85 },
+  show: { opacity: 1, scale: 1, transition: spring.snappy },
+};
+
+/** Hover/press de card de produto. */
+export const cardHover = { y: -4, transition: spring.soft };
+export const cardTap = { scale: 0.985, transition: spring.snappy };

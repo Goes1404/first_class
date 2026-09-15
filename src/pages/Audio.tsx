@@ -5,6 +5,11 @@ import {
   Truck, RefreshCw, Headphones, ShieldCheck,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { motion } from 'framer-motion';
+import { Stagger, StaggerItem } from '@/components/animations/Stagger';
+import { cardHover, cardTap, easing } from '@/lib/motion';
+
+const MotionLink = motion(Link);
 import { useProducts } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { useProductTestimonials } from '@/hooks/useAudioTestimonials';
@@ -85,9 +90,9 @@ const Audio: React.FC = () => {
 
       {isLoading && (
         <div className="mx-auto max-w-5xl px-4 pt-8 space-y-4" aria-busy="true">
-          <div className="h-8 w-2/3 rounded bg-white/5 animate-pulse" />
-          <div className="aspect-[4/3] rounded-3xl bg-white/5 animate-pulse" />
-          <div className="h-24 rounded-2xl bg-white/5 animate-pulse" />
+          <div className="h-8 w-2/3 rounded skeleton-dark" />
+          <div className="aspect-[4/3] rounded-3xl skeleton-dark" />
+          <div className="h-24 rounded-2xl skeleton-dark" />
         </div>
       )}
 
@@ -111,7 +116,7 @@ const Audio: React.FC = () => {
       {hero && (
         <>
           {/* ═══ Hero ═══ */}
-          <section className="relative overflow-hidden">
+          <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="relative overflow-hidden">
             <div
               className="absolute -top-24 left-1/2 -translate-x-1/2 h-72 w-72 rounded-full bg-indigo-600/25 blur-[90px] pointer-events-none"
               aria-hidden="true"
@@ -132,8 +137,10 @@ const Audio: React.FC = () => {
 
               {/* Produto em destaque sobre o pedestal */}
               <div className="relative mt-6 flex items-center justify-center">
-                <div
+                <motion.div
                   className="absolute bottom-3 h-10 w-52 rounded-[50%] bg-indigo-500/25 blur-2xl"
+                  animate={{ opacity: [0.55, 1, 0.55], scaleX: [1, 1.12, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                   aria-hidden="true"
                 />
                 <div
@@ -141,9 +148,11 @@ const Audio: React.FC = () => {
                   aria-hidden="true"
                 />
                 {hero.image ? (
-                  <img
+                  <motion.img
                     src={hero.image}
                     alt={hero.name}
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                     className="relative h-52 object-contain drop-shadow-[0_24px_40px_rgba(99,102,241,0.35)]"
                   />
                 ) : (
@@ -197,11 +206,11 @@ const Audio: React.FC = () => {
                 </div>
               )}
             </div>
-          </section>
+          </motion.section>
 
           {/* ═══ Ficha técnica ═══ */}
           {heroSpecs.length > 0 && (
-            <section className="mx-auto max-w-5xl px-4 pt-9">
+            <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="mx-auto max-w-5xl px-4 pt-9">
               <div className="rounded-2xl border border-white/10 overflow-hidden">
                 <div className="bg-white/[0.04] px-4 py-2.5 border-b border-white/10">
                   <span className="text-[10px] font-bold tracking-[0.28em] text-white/50 uppercase">
@@ -219,12 +228,12 @@ const Audio: React.FC = () => {
                   ))}
                 </dl>
               </div>
-            </section>
+            </motion.section>
           )}
 
           {/* ═══ Vitrine ═══ */}
           {rest.length > 0 && (
-            <section className="mx-auto max-w-5xl px-4 pt-10">
+            <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="mx-auto max-w-5xl px-4 pt-10">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-lg font-bold">Descubra a linha</h2>
                 <Link
@@ -235,12 +244,14 @@ const Audio: React.FC = () => {
                   Ver todos <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <Stagger className="mt-4 grid grid-cols-2 gap-3">
                 {rest.map((p) => {
                   const r = ratings?.[p.id];
                   return (
-                    <Link
-                      key={p.id}
+                    <StaggerItem key={p.id}>
+                    <MotionLink
+                      whileHover={cardHover}
+                      whileTap={cardTap}
                       to={`/produto/${p.id}`}
                       className="group rounded-2xl border border-white/8 bg-white/[0.03] p-3 hover:border-indigo-400/50 transition-colors"
                     >
@@ -270,16 +281,17 @@ const Audio: React.FC = () => {
                           <ArrowUpRight className="h-4 w-4" />
                         </span>
                       </div>
-                    </Link>
+                    </MotionLink>
+                    </StaggerItem>
                   );
                 })}
-              </div>
-            </section>
+              </Stagger>
+            </motion.section>
           )}
 
           {/* ═══ Números reais ═══ */}
           {stats && (
-            <section className="mx-auto max-w-5xl px-4 pt-10">
+            <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="mx-auto max-w-5xl px-4 pt-10">
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] grid grid-cols-3 divide-x divide-white/10">
                 {[
                   { v: stats.avg.toFixed(1).replace('.', ',') + '/5', l: 'Nota média' },
@@ -292,12 +304,12 @@ const Audio: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </section>
+            </motion.section>
           )}
 
           {/* ═══ Depoimentos reais ═══ */}
           {testimonials && testimonials.length > 0 && (
-            <section className="mx-auto max-w-5xl px-4 pt-10">
+            <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="mx-auto max-w-5xl px-4 pt-10">
               <h2 className="text-lg font-bold">Quem já comprou</h2>
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {testimonials.map((t) => (
@@ -328,11 +340,11 @@ const Audio: React.FC = () => {
                   </figure>
                 ))}
               </div>
-            </section>
+            </motion.section>
           )}
 
           {/* ═══ Garantias da loja ═══ */}
-          <section className="mx-auto max-w-5xl px-4 pt-10">
+          <motion.section initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.5, ease: easing.smooth }} className="mx-auto max-w-5xl px-4 pt-10">
             <ul className="grid grid-cols-3 gap-3">
               {[
                 { Icon: Truck, t: 'Entrega rápida', d: 'Mesmo dia em Osasco' },
@@ -346,7 +358,7 @@ const Audio: React.FC = () => {
                 </li>
               ))}
             </ul>
-          </section>
+          </motion.section>
         </>
       )}
     </div>

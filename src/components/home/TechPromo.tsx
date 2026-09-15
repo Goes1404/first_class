@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, ShieldCheck, Zap } from 'lucide-react';
 import { preloadProducts } from '@/lib/preloadRoutes';
 import { useAppSettings } from '@/hooks/useProducts';
+import { Stagger, StaggerItem } from '@/components/animations/Stagger';
 
 export const TechPromo: React.FC = () => {
   const { data: settings } = useAppSettings();
@@ -12,8 +13,9 @@ export const TechPromo: React.FC = () => {
 
   return (
     <section className="pt-8">
-      <div className="mx-auto max-w-5xl px-4 space-y-3">
+      <Stagger gap={0.12} className="mx-auto max-w-5xl px-4 space-y-3">
         {/* ─── Banner de oferta ─── */}
+        <StaggerItem>
         <div className="relative overflow-hidden rounded-2xl bg-[#0b1b3a] p-6 sm:p-7">
           <div className="absolute -right-12 -bottom-12 h-48 w-48 rounded-full bg-blue-500/25 blur-3xl" aria-hidden="true" />
           <div className="relative z-10 flex items-center justify-between gap-4">
@@ -42,8 +44,10 @@ export const TechPromo: React.FC = () => {
             </span>
           </div>
         </div>
+        </StaggerItem>
 
         {/* ─── Selos de confiança ─── */}
+        <StaggerItem>
         <ul className="grid grid-cols-3 gap-3">
           {[
             { Icon: Truck, title: 'Entrega rápida', desc: 'Mesmo dia em Osasco' },
@@ -60,7 +64,8 @@ export const TechPromo: React.FC = () => {
             </li>
           ))}
         </ul>
-      </div>
+        </StaggerItem>
+      </Stagger>
     </section>
   );
 };

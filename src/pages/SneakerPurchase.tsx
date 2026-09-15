@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Heart, ChevronDown, HelpCircle, ImageOff, Star } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { motion } from 'framer-motion';
+import { Pop } from '@/components/animations/Pop';
+import { spring } from '@/lib/motion';
 import { SlideToCart } from '@/components/SlideToCart';
 import { Product } from '@/types/database';
 import { useProduct, useProducts } from '@/hooks/useProducts';
@@ -82,10 +85,10 @@ const SneakerPurchase: React.FC = () => {
     return (
       <div className="min-h-screen bg-white p-4" aria-busy="true">
         <div className="mx-auto max-w-md space-y-4">
-          <div className="h-11 w-11 rounded-full bg-slate-100 animate-pulse" />
-          <div className="h-7 w-2/3 rounded bg-slate-100 animate-pulse" />
-          <div className="aspect-square rounded-3xl bg-slate-100 animate-pulse" />
-          <div className="h-[68px] rounded-full bg-slate-100 animate-pulse" />
+          <div className="h-11 w-11 rounded-full skeleton" />
+          <div className="h-7 w-2/3 rounded skeleton" />
+          <div className="aspect-square rounded-3xl skeleton" />
+          <div className="h-[68px] rounded-full skeleton" />
         </div>
       </div>
     );
@@ -178,9 +181,11 @@ const SneakerPurchase: React.FC = () => {
                 <span className="block text-[11px] font-bold text-slate-900 text-center mb-2">Tamanho</span>
                 <div className="flex flex-col gap-2">
                   {shownSizes.map((s) => (
-                    <button
+                    <motion.button
                       key={s}
                       type="button"
+                      whileTap={{ scale: 0.94 }}
+                      transition={spring.snappy}
                       onClick={() => setSize(s)}
                       aria-pressed={size === s}
                       className={`h-[52px] rounded-2xl border text-sm font-semibold transition-all ${
@@ -190,7 +195,7 @@ const SneakerPurchase: React.FC = () => {
                       }`}
                     >
                       {s}
-                    </button>
+                    </motion.button>
                   ))}
                   {sizes.length > SIZES_COLLAPSED && (
                     <button
@@ -268,7 +273,9 @@ const SneakerPurchase: React.FC = () => {
               aria-label={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               className="h-[52px] w-[52px] rounded-2xl border border-slate-200 bg-white flex items-center justify-center hover:border-slate-400 transition-colors"
             >
-              <Heart className={`h-5 w-5 ${fav ? 'text-rose-600 fill-rose-600' : 'text-slate-900'}`} />
+              <Pop value={String(fav)} className="flex">
+                <Heart className={`h-5 w-5 ${fav ? 'text-rose-600 fill-rose-600' : 'text-slate-900'}`} />
+              </Pop>
             </button>
             <span className="mt-1.5 text-[10px] text-slate-400">{fav ? 'Salvo' : 'Salvar'}</span>
           </div>

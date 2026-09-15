@@ -17,6 +17,7 @@ import { PageTransition } from "./components/animations/PageTransition";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { AdminMobileMenu } from "./components/AdminMobileMenu";
 import { IntroLoader } from "./components/animations/IntroLoader";
+import { MotionConfig } from "framer-motion";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 // ─── overlays não-críticos: carregados fora do bundle inicial, após o idle ────
@@ -109,6 +110,8 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ThemeProvider>
+  {/* Todas as animações respeitam prefers-reduced-motion do sistema. */}
+  <MotionConfig reducedMotion="user">
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -178,6 +181,7 @@ const App = () => (
       </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
+  </MotionConfig>
   </ThemeProvider>
 );
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Bell, ShoppingCart, X, Zap, Search, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { STORE } from '@/config/store';
+import { Pop } from '@/components/animations/Pop';
 
 const MENU_LINKS = [
   { label: 'Início', to: '/' },
@@ -17,9 +18,12 @@ const MENU_LINKS = [
 /** Contador nas bolhas de sino/carrinho. Some quando zero. */
 const Badge: React.FC<{ count: number }> = ({ count }) =>
   count > 0 ? (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+    <Pop
+      value={count}
+      className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white"
+    >
       {count > 9 ? '9+' : count}
-    </span>
+    </Pop>
   ) : null;
 
 export const TechTopBar: React.FC = () => {
