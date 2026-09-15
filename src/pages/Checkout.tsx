@@ -612,7 +612,7 @@ const Checkout = () => {
               <Button
                 onClick={() => {
                   orderItemsSnapshot.forEach(item => {
-                    for (let i = 0; i < item.quantity; i++) addToCart(item);
+                    for (let i = 0; i < item.quantity; i++) addToCart(item, { size: item.selectedSize, color: item.selectedColor });
                   });
                   setOrderSuccess(false);
                   setPaymentStatus('aguardando');
@@ -813,12 +813,17 @@ const Checkout = () => {
               
               <div className="space-y-6 mb-10 max-h-[300px] overflow-y-auto pr-4 scrollbar-hide">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-4 items-center">
+                  <div key={item.lineId} className="flex gap-4 items-center">
                     <div className="w-16 h-16 rounded-2xl bg-black border border-white/5 p-2">
                       <img src={item.image} alt="" className="w-full h-full object-contain mix-blend-lighten" />
                     </div>
                     <div className="flex-1">
                       <h4 className="text-xs font-bold text-white line-clamp-1">{item.name}</h4>
+                      {(item.selectedSize || item.selectedColor) && (
+                        <p className="text-[10px] uppercase tracking-widest text-white/40">
+                          {[item.selectedSize && `Tam ${item.selectedSize}`, item.selectedColor].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
                       <p className="text-[9px] text-white/30 uppercase tracking-widest mt-1">Quantidade: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-bold text-[#d4af37]">R$ {(item.price * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>

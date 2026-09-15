@@ -7,7 +7,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { preloadProductDetails } from '@/lib/preloadRoutes';
+import { preloadSneakerPurchase } from '@/lib/preloadRoutes';
 
 /** Categorias que contam como calçado. O recorte é por nome de categoria
  *  porque o catálogo não tem um campo de tipo — ajuste aqui se a loja usar
@@ -57,9 +57,9 @@ const SneakerCard: React.FC<{ product: Product; rating?: { avg_rating: number; r
   product, rating,
 }) => (
   <Link
-    to={`/produto/${product.id}`}
-    onPointerEnter={preloadProductDetails}
-    onTouchStart={preloadProductDetails}
+    to={`/tenis/${product.id}`}
+    onPointerEnter={preloadSneakerPurchase}
+    onTouchStart={preloadSneakerPurchase}
     className="w-[156px] shrink-0 rounded-2xl border border-slate-200 bg-white p-3 hover:border-blue-300 hover:shadow-lg transition-all"
   >
     <div className="min-h-[42px]">
@@ -291,7 +291,7 @@ const Sneakers: React.FC = () => {
                   />
                 </span>
               </button>
-              <Link to={`/produto/${featured.id}`} className="block">
+              <Link to={`/tenis/${featured.id}`} className="block">
                 <div className="h-[120px] flex items-center justify-center">
                   {featured.image ? (
                     <img src={featured.image} alt={featured.name} className="max-h-full max-w-full object-contain" />

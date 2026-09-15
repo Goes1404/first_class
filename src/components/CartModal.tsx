@@ -169,18 +169,25 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                   <span className={styles.itemsHeaderLabel}>{getTotalItems()} {getTotalItems() === 1 ? 'Item' : 'Itens'}</span>
                 </div>
                 {cartItems.map((item) => (
-                  <div key={item.id} className={styles.itemRow}>
+                  <div key={item.lineId} className={styles.itemRow}>
                     <div className={styles.itemThumb}>
                       <img src={item.image} alt={item.name} className={styles.itemThumbImg} />
                     </div>
                     <div className={styles.itemInfo}>
                       <h3 className={styles.itemName}>{item.name}</h3>
+                      {(item.selectedSize || item.selectedColor) && (
+                        <p className="text-[10px] uppercase tracking-widest text-white/40">
+                          {[item.selectedSize && `Tam ${item.selectedSize}`, item.selectedColor]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      )}
                       <p className={styles.itemPrice}>
                         R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                       <div className={styles.itemQtyRow}>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
                           className={styles.itemQtyBtn}
                           aria-label="Diminuir quantidade"
                         >
@@ -188,7 +195,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                         </button>
                         <span className={styles.itemQtyNum} aria-live="polite">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, Math.min(item.quantity + 1, item.stock))}
+                          onClick={() => updateQuantity(item.lineId, Math.min(item.quantity + 1, item.stock))}
                           disabled={item.quantity >= item.stock}
                           className={`${styles.itemQtyBtn} disabled:opacity-20 disabled:cursor-not-allowed`}
                           aria-label="Aumentar quantidade"
@@ -201,7 +208,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                       )}
                     </div>
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.lineId)}
                       className={styles.itemRemoveBtn}
                       aria-label={`Remover ${item.name}`}
                     >

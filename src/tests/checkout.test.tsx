@@ -83,4 +83,45 @@ describe('CartContext — fluxo de compra', () => {
     expect(result.current.cartItems).toHaveLength(0);
     expect(result.current.getTotalItems()).toBe(0);
   });
+
+  // ─── Variações (tamanho/cor) ───
+
+  it('sem variação, a linha do carrinho é o próprio id do produto', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart(mockProduct));
+    expect(result.current.cartItems[0].lineId).toBe('prod-001');
+  });
+
+  it('mesmo produto em tamanhos diferentes vira duas linhas', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart(mockProduct, { size: '40' }));
+    act(() => result.current.addToCart(mockProduct, { size: '41' }));
+    expect(result.current.cartItems).toHaveLength(2);
+    expect(result.current.getTotalItems()).toBe(2);
+    expect(result.current.cartItems.map((i) => i.selectedSize)).toEqual(['40', '41']);
+  });
+
+  it('mesmo tamanho duas vezes incrementa a mesma linha', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart(mockProduct, { size: '40' }));
+    act(() => result.current.addToCart(mockProduct, { size: '40' }));
+    expect(result.current.cartItems).toHaveLength(1);
+    expect(result.current.cartItems[0].quantity).toBe(2);
+  });
+
+  it('remover uma variação preserva as outras', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart(mockProduct, { size: '40' }));
+    act(() => result.current.addToCart(mockProduct, { size: '41' }));
+    act(() => result.current.removeFromCart(result.current.cartItems[0].lineId));
+    expect(result.current.cartItems).toHaveLength(1);
+    expect(result.current.cartItems[0].selectedSize).toBe('41');
+  });
+
+  it('a cor também separa linhas', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart(mockProduct, { size: '40', color: 'Preto' }));
+    act(() => result.current.addToCart(mockProduct, { size: '40', color: 'Verde' }));
+    expect(result.current.cartItems).toHaveLength(2);
+  });
 });

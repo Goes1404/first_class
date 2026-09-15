@@ -4,15 +4,31 @@ import { Product } from '@/types/database';
 
 const CART_STORAGE_KEY = 'jr_cart';
 
+export interface CartVariant {
+  size?: string;
+  color?: string;
+}
+
 export interface CartItem extends Product {
   quantity: number;
+  /** Chave da linha no carrinho. Igual ao id do produto quando não há
+   *  variação, para que quem já chamava as funções com o id siga funcionando. */
+  lineId: string;
+  selectedSize?: string;
+  selectedColor?: string;
 }
+
+/** Mesmo produto em tamanhos diferentes são linhas diferentes do carrinho. */
+export const cartLineId = (productId: string, variant?: CartVariant) =>
+  variant?.size || variant?.color
+    ? `${productId}::${variant.size ?? ''}::${variant.color ?? ''}`
+    : productId;
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Product, variant?: CartVariant) => void;
+  removeFromCart: (lineId: string) => void;
+  updateQuantity: (lineId: string, quantity: number) => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
   clearCart: () => void;
@@ -36,7 +52,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const parsed: CartItem[] = stored ? JSON.parse(stored) : [];
+      // Carrinhos salvos antes das variações não têm lineId.
+      return parsed.map((item) => ({ ...item, lineId: item.lineId ?? item.id }));
     } catch {
       return [];
     }
@@ -50,37 +68,47 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [cartItems]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, variant?: CartVariant) => {
+    const lineId = cartLineId(product.id, variant);
     setCartItems(currentItems => {
-      const existingItem = currentItems.find(item => item.id === product.id);
-      
+      const existingItem = currentItems.find(item => item.lineId === lineId);
+
       if (existingItem) {
         return currentItems.map(item =>
-          item.id === product.id
+          item.lineId === lineId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        return [...currentItems, { ...product, quantity: 1 }];
+        return [
+          ...currentItems,
+          {
+            ...product,
+            quantity: 1,
+            lineId,
+            selectedSize: variant?.size,
+            selectedColor: variant?.color,
+          },
+        ];
       }
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCartItems(currentItems => 
-      currentItems.filter(item => item.id !== productId)
+  const removeFromCart = (lineId: string) => {
+    setCartItems(currentItems =>
+      currentItems.filter(item => item.lineId !== lineId)
     );
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (lineId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(lineId);
       return;
     }
 
     setCartItems(currentItems =>
       currentItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.lineId === lineId ? { ...item, quantity } : item
       )
     );
   };

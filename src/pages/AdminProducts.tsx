@@ -77,6 +77,8 @@ const AdminProducts = () => {
     category: '',
     brand: '',
     brand_logo_url: '',
+    sizes: '',
+    colors: [] as { name: string; hex: string }[],
     stock: '999',
     is_featured: false,
     weight: '',
@@ -134,6 +136,8 @@ const AdminProducts = () => {
       category: '',
       brand: '',
       brand_logo_url: '',
+      sizes: '',
+      colors: [],
       stock: '999',
       is_featured: false,
       weight: '',
@@ -157,6 +161,8 @@ const AdminProducts = () => {
       category: product.category || '',
       brand: product.brand || '',
       brand_logo_url: product.brand_logo_url || '',
+      sizes: (product.sizes || []).join(', '),
+      colors: product.colors || [],
       stock: product.stock.toString(),
       is_featured: product.is_featured,
       weight: product.weight?.toString() || '',
@@ -197,6 +203,8 @@ const AdminProducts = () => {
       category: normalizeCategory(formData.category),
       brand: formData.brand.trim() || null,
       brand_logo_url: formData.brand_logo_url.trim() || null,
+      sizes: formData.sizes.split(',').map(t => t.trim()).filter(Boolean),
+      colors: formData.colors.filter(c => c.name.trim() && c.hex.trim()),
       stock,
       is_featured: formData.is_featured,
       weight: parseFloat(formData.weight) || 0.3,
@@ -401,6 +409,61 @@ const AdminProducts = () => {
                     <p className="text-[10px] text-white/25 leading-relaxed">
                       Exibido no filtro de marcas da aba de tênis. Sem logo, aparece a inicial da marca.
                     </p>
+                  </div>
+                  <div className="space-y-4 md:col-span-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Tamanhos (grade)</Label>
+                    <Input
+                      value={formData.sizes}
+                      onChange={(e) => setFormData({...formData, sizes: e.target.value})}
+                      className="bg-white/5 border-white/10 focus:border-[#d4af37]/40 h-12 rounded-xl"
+                      placeholder="38, 39, 40, 41, 42"
+                    />
+                    <p className="text-[10px] text-white/25">
+                      Separe por vírgula, na ordem em que devem aparecer. Deixe vazio para produtos sem grade.
+                    </p>
+                  </div>
+                  <div className="space-y-4 md:col-span-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Cores</Label>
+                    {formData.colors.map((c, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <Input
+                          value={c.name}
+                          onChange={(e) => {
+                            const colors = [...formData.colors];
+                            colors[i] = { ...colors[i], name: e.target.value };
+                            setFormData({ ...formData, colors });
+                          }}
+                          className="bg-white/5 border-white/10 h-11 rounded-xl flex-1"
+                          placeholder="Nome da cor"
+                        />
+                        <input
+                          type="color"
+                          value={c.hex || '#000000'}
+                          onChange={(e) => {
+                            const colors = [...formData.colors];
+                            colors[i] = { ...colors[i], hex: e.target.value };
+                            setFormData({ ...formData, colors });
+                          }}
+                          aria-label={`Cor de ${c.name || 'nova cor'}`}
+                          className="h-11 w-14 rounded-xl bg-transparent border border-white/10 cursor-pointer"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, colors: formData.colors.filter((_, j) => j !== i) })}
+                          aria-label={`Remover ${c.name || 'cor'}`}
+                          className="h-11 px-3 rounded-xl border border-white/10 text-white/40 hover:text-white/80 text-xs"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, colors: [...formData.colors, { name: '', hex: '#000000' }] })}
+                      className="h-11 px-4 rounded-xl border border-white/10 text-white/50 hover:text-white/80 text-xs font-bold uppercase tracking-widest"
+                    >
+                      + Adicionar cor
+                    </button>
                   </div>
                 </div>
                 

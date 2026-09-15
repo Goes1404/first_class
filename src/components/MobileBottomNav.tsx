@@ -17,8 +17,12 @@ export const MobileBottomNav = () => {
   const totalItems = getTotalItems();
 
   // Esconde onde já existe barra de ação fixa própria (evita colisão com o CTA).
+  // /tenis lista e mantém a nav; /tenis/<id> é a tela de compra e tem a sua.
   const hidden =
-    pathname.startsWith('/admin') || pathname === '/checkout' || pathname.startsWith('/produto/');
+    pathname.startsWith('/admin') ||
+    pathname === '/checkout' ||
+    pathname.startsWith('/produto/') ||
+    /^\/tenis\/.+/.test(pathname);
   if (hidden) return null;
 
   const isActive = (path: string) => (path === '/' ? pathname === '/' : pathname.startsWith(path));

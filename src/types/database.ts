@@ -1,3 +1,8 @@
+export interface ProductColor {
+  name: string;
+  hex: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -10,6 +15,10 @@ export interface Product {
   category: string;
   brand?: string;
   brand_logo_url?: string;
+  /** Grade de tamanhos do calçado, na ordem de exibição. */
+  sizes?: string[];
+  /** Cores disponíveis, exibidas como swatches na tela de compra. */
+  colors?: ProductColor[];
   stock: number;
   is_featured: boolean;
   weight?: number;  // kg — usado no cálculo de frete
