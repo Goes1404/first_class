@@ -1,71 +1,70 @@
 import React, { useMemo } from 'react';
-import { Lock, Plus, Minus, ShoppingBag, Diamond, Trash2, ArrowRight, Zap, Sparkles, Truck } from 'lucide-react';
+import { Lock, Plus, Minus, ShoppingBag, Trash2, ArrowRight, Sparkles, Truck, ImageOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useCart } from '@/contexts/CartContext';
 import { useProducts, useAppSettings } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { Pop } from '@/components/animations/Pop';
+import { spring } from '@/lib/motion';
+
+const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 // ─── styles ──────────────────────────────────────────────────────────────────
 const styles = {
-  sheet: 'w-full sm:max-w-md bg-[#050505] backdrop-blur-3xl border-l border-white/10 p-0 flex flex-col shadow-[0_0_100px_rgba(0,0,0,1)]',
-  header: 'p-8 border-b border-white/5 bg-[#0a0a0a]/80',
-  title: 'flex items-center gap-3',
-  titleGlow: 'absolute inset-0 bg-[#d4af37]/20 blur-lg rounded-full',
-  scrollArea: 'flex-1 overflow-y-auto custom-scrollbar',
-  // Empty state
-  emptyWrap: 'h-full flex flex-col items-center justify-center p-12 text-center space-y-6',
-  emptyIconWrap: 'w-24 h-24 rounded-full bg-[#d4af37]/5 flex items-center justify-center relative',
-  emptyPing: 'absolute inset-0 bg-[#d4af37]/10 rounded-full animate-ping opacity-20',
-  emptyTitle: 'font-serif text-2xl font-bold text-white',
-  emptySubtitle: 'text-[10px] text-white/40 uppercase tracking-widest leading-relaxed max-w-[200px] mx-auto font-bold',
-  emptyBtn: 'bg-[#d4af37] text-black hover:bg-[#f2ca50] transition-all rounded-full px-10 h-14 text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(212,175,55,0.2)]',
-  // Filled state
-  contentWrap: 'p-8 space-y-8',
-  // Shipping progress
-  shippingCard: 'bg-[#d4af37]/5 border border-[#d4af37]/20 p-5 rounded-3xl relative overflow-hidden group',
-  shippingGlow: 'absolute -right-10 -top-10 w-32 h-32 bg-[#d4af37]/10 blur-[40px] rounded-full',
+  sheet: 'w-full sm:max-w-md bg-white border-l border-slate-200 p-0 flex flex-col',
+  header: 'px-5 py-4 border-b border-slate-200',
+  title: 'flex items-center gap-2 text-base font-bold text-slate-900',
+  scrollArea: 'flex-1 overflow-y-auto',
+  // Vazio
+  emptyWrap: 'h-full flex flex-col items-center justify-center p-10 text-center gap-5',
+  emptyIconWrap: 'h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center',
+  emptyTitle: 'text-lg font-bold text-slate-900',
+  emptySubtitle: 'text-sm text-slate-500 max-w-[220px] mx-auto',
+  emptyBtn: 'h-12 px-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm',
+  // Com itens
+  contentWrap: 'p-5 space-y-6',
+  // Frete grátis
+  shippingCard: (complete: boolean) =>
+    `p-4 rounded-2xl border ${complete ? 'bg-emerald-50 border-emerald-100' : 'bg-blue-50 border-blue-100'}`,
   shippingIconWrap: (complete: boolean) =>
-    `p-2 rounded-xl ${complete ? 'bg-green-500/20 text-green-500' : 'bg-[#d4af37]/20 text-[#d4af37]'}`,
-  shippingBarTrack: 'h-1.5 w-full bg-white/5 rounded-full overflow-hidden',
-  shippingBarFill: (complete: boolean) =>
-    `h-full rounded-full transition-all duration-1000 ${
-      complete
-        ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-        : 'bg-gradient-to-r from-[#d4af37] to-[#f2ca50]'
+    `h-9 w-9 rounded-xl flex items-center justify-center ${
+      complete ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'
     }`,
-  // Items list
-  itemsHeaderRow: 'flex items-center justify-between px-2',
-  itemsHeaderLabel: 'text-[9px] font-black uppercase tracking-[0.3em] text-white/20',
-  itemRow: 'group relative flex items-center gap-5 p-4 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-[#d4af37]/30 hover:bg-white/[0.04] transition-all',
-  itemThumb: 'w-20 h-20 rounded-2xl overflow-hidden bg-black border border-white/5 flex-shrink-0',
-  itemThumbImg: 'w-full h-full object-cover mix-blend-lighten',
-  itemInfo: 'flex-1 min-w-0 space-y-2',
-  itemName: 'text-xs font-bold text-white truncate uppercase tracking-wider pr-6',
-  itemPrice: 'text-xs font-serif font-black text-[#d4af37]',
-  itemQtyRow: 'flex items-center gap-1 bg-black/60 rounded-full border border-white/10 p-1 w-fit',
-  itemQtyBtn: 'h-9 w-9 flex items-center justify-center text-white/50 hover:text-white transition-colors',
-  itemQtyNum: 'w-7 text-center text-xs font-black text-white',
-  itemRemoveBtn: 'absolute top-4 right-4 text-white/20 hover:text-red-400 transition-colors p-2 bg-black/40 rounded-full opacity-0 group-hover:opacity-100',
-  // Upsell
-  upsellSection: 'pt-6 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700',
-  upsellHeader: 'flex items-center gap-2 mb-4',
-  upsellCard: 'p-4 rounded-3xl bg-gradient-to-r from-[#d4af37]/5 to-transparent border border-[#d4af37]/20 flex items-center gap-4',
-  upsellThumb: 'w-14 h-14 rounded-xl bg-black border border-[#d4af37]/20 overflow-hidden',
-  upsellAddBtn: 'bg-[#d4af37] text-black hover:bg-[#f2ca50] rounded-full h-8 w-8 p-0 flex items-center justify-center',
-  // Footer
-  footer: 'p-8 bg-[#0a0a0a] border-t border-white/5 space-y-6 relative z-20',
+  shippingBarTrack: 'h-2 w-full bg-white rounded-full overflow-hidden border border-black/5',
+  shippingBarFill: (complete: boolean) => `h-full rounded-full ${complete ? 'bg-emerald-500' : 'bg-blue-600'}`,
+  // Lista
+  itemsHeaderRow: 'flex items-center justify-between px-1',
+  itemsHeaderLabel: 'text-[11px] font-semibold uppercase tracking-wider text-slate-400',
+  itemRow: 'relative flex items-center gap-3.5 p-3 rounded-2xl bg-white border border-slate-200',
+  itemThumb: 'h-20 w-20 rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center shrink-0',
+  itemThumbImg: 'h-full w-full object-contain p-1.5',
+  itemInfo: 'flex-1 min-w-0 space-y-1.5',
+  itemName: 'text-sm font-semibold text-slate-900 line-clamp-1 pr-9',
+  itemVariant: 'text-[11px] text-slate-500',
+  itemPrice: 'text-sm font-bold text-slate-900',
+  itemQtyRow: 'inline-flex items-center gap-0.5 border border-slate-200 rounded-full p-0.5',
+  itemQtyBtn: 'h-9 w-9 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors',
+  itemQtyNum: 'w-7 text-center text-sm font-bold text-slate-900',
+  itemRemoveBtn: 'absolute top-2 right-2 h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors',
+  // Sugestão
+  upsellSection: 'pt-5 border-t border-slate-200',
+  upsellHeader: 'flex items-center gap-1.5 mb-3',
+  upsellCard: 'p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3',
+  upsellThumb: 'h-14 w-14 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0',
+  upsellAddBtn: 'h-9 w-9 p-0 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center',
+  // Rodapé
+  footer: 'p-5 bg-white border-t border-slate-200 space-y-4',
   summaryRow: 'flex items-center justify-between',
-  summaryLabel: 'text-[10px] font-black uppercase tracking-[0.3em] text-white/70',
-  shippingValueText: (free: boolean) => `text-xs font-bold ${free ? 'text-green-500' : 'text-white/80'}`,
-  totalRow: 'flex items-center justify-between pt-4 border-t border-white/5',
-  totalLabel: 'text-[10px] font-black uppercase tracking-[0.3em] text-white',
-  totalValue: 'text-3xl font-serif font-black text-[#d4af37] drop-shadow-[0_0_15px_rgba(212,175,55,0.2)]',
-  checkoutBtn: 'w-full bg-[#d4af37] hover:bg-[#f2ca50] text-black font-black h-16 rounded-2xl shadow-[0_0_40px_rgba(212,175,55,0.2)] transition-all uppercase tracking-[0.2em] text-[10px] group relative overflow-hidden',
-  checkoutShine: 'absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300',
-  reserveNote: 'flex items-center justify-center gap-2 pt-2',
-  reserveText: 'text-center text-[8px] text-white/30 uppercase tracking-[0.3em] font-black',
+  summaryLabel: 'text-sm text-slate-500',
+  summaryValue: 'text-sm font-semibold text-slate-900',
+  shippingValueText: (free: boolean) => `text-sm font-semibold ${free ? 'text-emerald-600' : 'text-slate-900'}`,
+  totalRow: 'flex items-center justify-between pt-3 border-t border-slate-200',
+  totalLabel: 'text-sm font-bold text-slate-900',
+  totalValue: 'text-2xl font-bold text-slate-900 tracking-[-0.02em]',
+  checkoutBtn: 'w-full h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[15px] flex items-center justify-center gap-2',
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -83,6 +82,7 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   const totalPrice = getTotalPrice();
+  const totalItems = getTotalItems();
   const progressToFreeShipping = Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100);
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - totalPrice;
   const isFreeShipping = progressToFreeShipping >= 100;
@@ -105,11 +105,13 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
       <SheetContent side="right" className={styles.sheet}>
         <SheetHeader className={styles.header}>
           <SheetTitle className={styles.title}>
-            <div className="relative">
-              <Diamond className="h-5 w-5 text-[#d4af37]" />
-              <div className={styles.titleGlow} />
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Seu Vault</span>
+            <ShoppingBag className="h-5 w-5 text-blue-600" aria-hidden="true" />
+            Sua sacola
+            {totalItems > 0 && (
+              <span className="ml-1 text-sm font-semibold text-slate-400">
+                · {totalItems} {totalItems === 1 ? 'item' : 'itens'}
+              </span>
+            )}
           </SheetTitle>
         </SheetHeader>
 
@@ -117,129 +119,147 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
           {cartItems.length === 0 ? (
             <div className={styles.emptyWrap}>
               <div className={styles.emptyIconWrap}>
-                <ShoppingBag className="h-10 w-10 text-[#d4af37]/40" />
-                <div className={styles.emptyPing} />
+                <ShoppingBag className="h-8 w-8 text-slate-400" aria-hidden="true" />
               </div>
-              <div className="space-y-3">
-                <h3 className={styles.emptyTitle}>O vault está vazio</h3>
-                <p className={styles.emptySubtitle}>
-                  Descubra peças únicas e inicie sua seleção exclusiva hoje.
-                </p>
+              <div className="space-y-1.5">
+                <h3 className={styles.emptyTitle}>Sua sacola está vazia</h3>
+                <p className={styles.emptySubtitle}>Adicione produtos e eles aparecem aqui.</p>
               </div>
-              <Button onClick={onClose} className={styles.emptyBtn}>
-                Explorar Coleção
+              <Button onClick={() => { onClose(); navigate('/produtos'); }} className={styles.emptyBtn}>
+                Ver produtos
               </Button>
             </div>
           ) : (
             <div className={styles.contentWrap}>
-              {/* Shipping progress */}
-              <div className={styles.shippingCard}>
-                <div className={styles.shippingGlow} />
-                <div className="relative z-10 space-y-4">
+              {/* Frete grátis */}
+              <div className={styles.shippingCard(isFreeShipping)}>
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className={styles.shippingIconWrap(isFreeShipping)}>
-                      <Truck className="w-4 h-4" />
+                      <Truck className="w-4 h-4" aria-hidden="true" />
                     </div>
                     <div>
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-white">
-                        {isFreeShipping ? 'Frete Expresso Desbloqueado' : 'Frete Expresso Grátis'}
+                      <h4 className="text-sm font-bold text-slate-900">
+                        {isFreeShipping ? 'Frete grátis liberado' : 'Frete grátis'}
                       </h4>
-                      <p className="text-xs text-white/40 font-bold">
+                      <p className="text-xs text-slate-500">
                         {isFreeShipping ? (
-                          'Frete grátis aplicado!'
+                          'Aplicado no seu pedido.'
                         ) : (
-                          <>Faltam <span className="text-[#d4af37]">R$ {amountToFreeShipping.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></>
+                          <>Faltam <span className="font-semibold text-slate-900">{brl(amountToFreeShipping)}</span></>
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className={styles.shippingBarTrack}>
-                    <div
+                  <div className={styles.shippingBarTrack} role="progressbar" aria-valuenow={Math.round(progressToFreeShipping)} aria-valuemin={0} aria-valuemax={100} aria-label="Progresso para o frete grátis">
+                    <motion.div
                       className={styles.shippingBarFill(isFreeShipping)}
-                      style={{ width: `${progressToFreeShipping}%` }}
+                      initial={false}
+                      animate={{ width: `${progressToFreeShipping}%` }}
+                      transition={spring.soft}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Items */}
-              <div className="space-y-4">
+              {/* Itens */}
+              <div className="space-y-3">
                 <div className={styles.itemsHeaderRow}>
-                  <span className={styles.itemsHeaderLabel}>Itens Selecionados</span>
-                  <span className={styles.itemsHeaderLabel}>{getTotalItems()} {getTotalItems() === 1 ? 'Item' : 'Itens'}</span>
+                  <span className={styles.itemsHeaderLabel}>Itens</span>
+                  <span className={styles.itemsHeaderLabel}>{totalItems} {totalItems === 1 ? 'item' : 'itens'}</span>
                 </div>
-                {cartItems.map((item) => (
-                  <div key={item.lineId} className={styles.itemRow}>
-                    <div className={styles.itemThumb}>
-                      <img src={item.image} alt={item.name} className={styles.itemThumbImg} />
-                    </div>
-                    <div className={styles.itemInfo}>
-                      <h3 className={styles.itemName}>{item.name}</h3>
-                      {(item.selectedSize || item.selectedColor) && (
-                        <p className="text-[10px] uppercase tracking-widest text-white/40">
-                          {[item.selectedSize && `Tam ${item.selectedSize}`, item.selectedColor]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </p>
-                      )}
-                      <p className={styles.itemPrice}>
-                        R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                      <div className={styles.itemQtyRow}>
-                        <button
-                          onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
-                          className={styles.itemQtyBtn}
-                          aria-label="Diminuir quantidade"
-                        >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <span className={styles.itemQtyNum} aria-live="polite">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.lineId, Math.min(item.quantity + 1, item.stock))}
-                          disabled={item.quantity >= item.stock}
-                          className={`${styles.itemQtyBtn} disabled:opacity-20 disabled:cursor-not-allowed`}
-                          aria-label="Aumentar quantidade"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                      {item.quantity >= item.stock && (
-                        <span className="text-[9px] text-amber-400 font-bold">Máx. {item.stock} un. em estoque</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeFromCart(item.lineId)}
-                      className={styles.itemRemoveBtn}
-                      aria-label={`Remover ${item.name}`}
+                <AnimatePresence initial={false}>
+                  {cartItems.map((item) => (
+                    <motion.div
+                      key={item.lineId}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: 24, height: 0, marginBottom: 0 }}
+                      transition={{ duration: 0.22 }}
+                      className={styles.itemRow}
                     >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+                      <div className={styles.itemThumb}>
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} className={styles.itemThumbImg} />
+                        ) : (
+                          <ImageOff className="h-5 w-5 text-slate-300" aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className={styles.itemInfo}>
+                        <h3 className={styles.itemName}>{item.name}</h3>
+                        {(item.selectedSize || item.selectedColor) && (
+                          <p className={styles.itemVariant}>
+                            {[item.selectedSize && `Tam ${item.selectedSize}`, item.selectedColor]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </p>
+                        )}
+                        <p className={styles.itemPrice}>{brl(item.price)}</p>
+                        <div className={styles.itemQtyRow}>
+                          <button
+                            onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
+                            className={styles.itemQtyBtn}
+                            aria-label="Diminuir quantidade"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <Pop value={item.quantity} className={styles.itemQtyNum}>
+                            <span aria-live="polite">{item.quantity}</span>
+                          </Pop>
+                          <button
+                            onClick={() => updateQuantity(item.lineId, Math.min(item.quantity + 1, item.stock))}
+                            disabled={item.quantity >= item.stock}
+                            className={`${styles.itemQtyBtn} disabled:opacity-30 disabled:cursor-not-allowed`}
+                            aria-label="Aumentar quantidade"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        {item.quantity >= item.stock && (
+                          <span className="block text-[11px] font-medium text-amber-600">
+                            Máx. {item.stock} un. em estoque
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(item.lineId)}
+                        className={styles.itemRemoveBtn}
+                        aria-label={`Remover ${item.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
 
-              {/* Upsell */}
+              {/* Sugestão */}
               {upsellItem && (
                 <div className={styles.upsellSection}>
                   <div className={styles.upsellHeader}>
-                    <Sparkles className="w-3 h-3 text-[#d4af37]" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#d4af37]">Você também pode gostar</span>
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600" aria-hidden="true" />
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      Você também pode gostar
+                    </span>
                   </div>
                   <div className={styles.upsellCard}>
                     <div className={styles.upsellThumb}>
-                      <img src={upsellItem.image || '/placeholder.svg'} alt={upsellItem.name} className="w-full h-full object-contain" />
+                      {upsellItem.image ? (
+                        <img src={upsellItem.image} alt={upsellItem.name} className="h-full w-full object-contain p-1" />
+                      ) : (
+                        <ImageOff className="h-4 w-4 text-slate-300" aria-hidden="true" />
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-bold text-white uppercase line-clamp-1">{upsellItem.name}</p>
-                      <p className="text-xs font-serif font-black text-[#d4af37] mt-1">
-                        + R$ {Number(upsellItem.price).toLocaleString('pt-BR')}
-                      </p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 line-clamp-1">{upsellItem.name}</p>
+                      <p className="text-sm font-bold text-slate-900 mt-0.5">+ {brl(Number(upsellItem.price))}</p>
                     </div>
                     <Button
                       size="sm"
                       onClick={() => {
                         addToCart(upsellItem);
-                        toast({ title: 'Item Adicionado', description: 'Seleção perfeita.' });
+                        toast({ title: 'Adicionado ao carrinho', description: upsellItem.name });
                       }}
                       className={styles.upsellAddBtn}
                       aria-label={`Adicionar ${upsellItem.name}`}
@@ -253,54 +273,44 @@ export const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Rodapé */}
         {cartItems.length > 0 && (
           <div className={styles.footer}>
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Subtotal</span>
-                <span className="text-xs font-serif font-bold text-white/60">
-                  R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
+                <span className={styles.summaryValue}>{brl(totalPrice)}</span>
               </div>
               <div className={styles.summaryRow}>
                 <span className={styles.summaryLabel}>Frete</span>
                 <span className={styles.shippingValueText(isFreeShipping)}>
-                  {isFreeShipping ? 'Cortesia' : 'Calculado no Checkout'}
+                  {isFreeShipping ? 'Grátis' : 'Calculado no checkout'}
                 </span>
               </div>
               <div className={styles.totalRow}>
-                <span className={styles.totalLabel}>Total Estimado</span>
-                <span className={styles.totalValue}>
-                  R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
+                <span className={styles.totalLabel}>Total</span>
+                <Pop value={totalPrice} className={styles.totalValue}>
+                  {brl(totalPrice)}
+                </Pop>
               </div>
             </div>
 
             <Button className={styles.checkoutBtn} onClick={handleCheckout}>
-              <span className="relative z-10 flex items-center justify-center">
-                <Lock className="w-4 h-4 mr-2" />
-                Finalizar Compra Segura
-                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
-              <div className={styles.checkoutShine} />
+              <Lock className="w-4 h-4" aria-hidden="true" />
+              Finalizar compra
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Button>
 
             <button
               onClick={() => { onClose(); navigate('/produtos'); }}
-              className="w-full text-center text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-[#d4af37] transition-colors py-1"
+              className="w-full h-10 text-center text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
             >
-              Continuar Comprando
+              Continuar comprando
             </button>
 
-            <p className="text-center text-[9px] uppercase tracking-[0.25em] font-black text-white/40">
-              <span className="text-[#25D366]">5% OFF no PIX</span> · aplicado no checkout
+            <p className="text-center text-xs text-slate-500">
+              <span className="font-semibold text-emerald-600">5% OFF no PIX</span> · aplicado no checkout
             </p>
-
-            <div className={styles.reserveNote}>
-              <Zap className="w-3 h-3 text-[#d4af37]" />
-              <p className={styles.reserveText}>Seus itens estão reservados por 15 minutos</p>
-            </div>
           </div>
         )}
       </SheetContent>

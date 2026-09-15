@@ -353,3 +353,10 @@
     .skeleton::after, .skeleton-dark::after { animation: none; }
   }
 }
+
+/* A loja é clara: o fundo do documento acompanha, para não piscar escuro na
+   transição de rota nem no overscroll do celular. As páginas que ainda usam o
+   tema antigo pintam o próprio fundo escuro por cima. */
+body {
+  background-color: #ffffff;
+}

@@ -2,9 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductCard, ProductCardSkeleton } from './ProductCard';
-import { Sparkles, ArrowRight, Diamond } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Button } from './ui/button';
 
 interface SmartShowcaseProps {
   title?: string;
@@ -15,13 +14,13 @@ interface SmartShowcaseProps {
   mode?: 'trending' | 'related' | 'personalized';
 }
 
-export const SmartShowcase: React.FC<SmartShowcaseProps> = ({ 
-  title = "Seleção Inteligente", 
-  subtitle = "Curadoria exclusiva baseada em dados",
+export const SmartShowcase: React.FC<SmartShowcaseProps> = ({
+  title = 'Em alta',
+  subtitle = 'Os produtos mais procurados da loja.',
   category,
   excludeProductId,
   limit = 4,
-  mode = 'trending'
+  mode = 'trending',
 }) => {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['smart-showcase', mode, category, excludeProductId],
@@ -37,18 +36,17 @@ export const SmartShowcase: React.FC<SmartShowcaseProps> = ({
       const { data, error } = await query.limit(limit);
       if (error) throw error;
       return data;
-    }
+    },
   });
 
   if (isLoading) {
     return (
-      <div className="space-y-10">
-        <div className="space-y-3">
-          <div className="h-4 w-44 bg-white/5 rounded animate-pulse" />
-          <div className="h-9 w-64 bg-white/5 rounded animate-pulse" />
-          <div className="h-4 w-80 bg-white/5 rounded animate-pulse" />
+      <div className="space-y-6" aria-busy="true">
+        <div className="space-y-2">
+          <div className="h-3 w-28 rounded skeleton" />
+          <div className="h-7 w-56 rounded skeleton" />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(limit)].map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -60,31 +58,29 @@ export const SmartShowcase: React.FC<SmartShowcaseProps> = ({
   if (products.length === 0) return null;
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-[#d4af37]">
-            <Sparkles className="w-4 h-4 fill-[#d4af37]/20" />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">{mode === 'trending' ? 'Seleção em Alta' : 'Seleção Personalizada'}</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">
-            {title}
-          </h2>
-          <p className="text-white/30 text-sm max-w-lg">{subtitle}</p>
+    <div className="space-y-5">
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600">
+            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+            {mode === 'trending' ? 'Em alta' : 'Relacionados'}
+          </span>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h2>
+          <p className="text-sm text-slate-500">{subtitle}</p>
         </div>
-        <Link to="/produtos">
-          <Button variant="ghost" className="text-white/40 hover:text-[#d4af37] text-[10px] uppercase font-black tracking-widest p-0 group">
-            Ver Coleção Completa <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Button>
+        <Link
+          to="/produtos"
+          className="shrink-0 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          Ver todos <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      
     </div>
   );
 };

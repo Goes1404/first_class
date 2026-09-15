@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Star, MessageSquare, Send, User, Calendar, CheckCircle2 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Star, MessageSquare, Send, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { motion } from 'framer-motion';
+import { spring } from '@/lib/motion';
 
 interface Review {
   id: string;
@@ -24,6 +26,18 @@ interface ProductReviewsProps {
   productId: string;
 }
 
+const Stars: React.FC<{ value: number; className?: string }> = ({ value, className = 'w-4 h-4' }) => (
+  <span className="flex items-center gap-0.5" aria-label={`${value} de 5`}>
+    {[1, 2, 3, 4, 5].map((s) => (
+      <Star
+        key={s}
+        className={`${className} ${s <= Math.round(value) ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`}
+        aria-hidden="true"
+      />
+    ))}
+  </span>
+);
+
 export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -39,10 +53,10 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
         .select('*, user:profiles(full_name, avatar_url)')
         .eq('product_id', productId)
         .order('created_at', { ascending: false });
-      
+
       if (error) return [];
-      return data as any[];
-    }
+      return data as Review[];
+    },
   });
 
   const submitReview = async (e: React.FormEvent) => {
@@ -52,7 +66,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
       return;
     }
     if (!comment.trim()) {
-      toast.error('Por favor, escreva um comentário.');
+      toast.error('Escreva um comentário antes de enviar.');
       return;
     }
 
@@ -64,12 +78,12 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
           product_id: productId,
           user_id: user.id,
           rating,
-          comment
+          comment,
         });
 
       if (error) throw error;
 
-      toast.success('Avaliação enviada com sucesso! ✨');
+      toast.success('Avaliação enviada. Obrigado!');
       setComment('');
       setRating(5);
       queryClient.invalidateQueries({ queryKey: ['product-reviews', productId] });
@@ -80,133 +94,128 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
     }
   };
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
     : 0;
 
   return (
-    <section className="mt-24 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-white/5 pb-12">
-        <div className="space-y-4">
-          <h2 className="text-4xl font-serif font-bold text-white tracking-tight">Experiência do <span className="text-[#d4af37] italic">Cliente</span></h2>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className={`w-5 h-5 ${s <= Math.round(averageRating) ? 'text-[#d4af37] fill-[#d4af37]' : 'text-white/10'}`} />
-              ))}
-            </div>
-            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">{reviews.length} Avaliações</span>
+    <section className="mt-16 space-y-8" aria-labelledby="avaliacoes-titulo">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+        <div className="space-y-2">
+          <h2 id="avaliacoes-titulo" className="text-2xl font-bold text-slate-900 tracking-tight">Avaliações</h2>
+          <div className="flex items-center gap-3">
+            <Stars value={averageRating} className="w-5 h-5" />
+            <span className="text-sm text-slate-500">
+              {reviews.length > 0 ? (
+                <>
+                  <span className="font-semibold text-slate-900">{averageRating.toFixed(1)}</span> · {reviews.length}{' '}
+                  {reviews.length === 1 ? 'avaliação' : 'avaliações'}
+                </>
+              ) : (
+                'Ainda sem avaliações'
+              )}
+            </span>
           </div>
         </div>
-        
-        {user && (
-          <div className="hidden md:block">
-            <div className="text-[10px] font-black uppercase tracking-widest text-[#d4af37] mb-2 text-right">Sua opinião importa</div>
-            <p className="text-xs text-white/30 text-right max-w-[200px]">Compartilhe sua experiência com esta peça exclusiva.</p>
-          </div>
-        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Review Form — second on mobile so reviews are read first */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+        {/* Formulário — no mobile vem depois, para a leitura vir primeiro */}
         <div className="lg:col-span-5 order-2 lg:order-1">
           {user ? (
-            <form onSubmit={submitReview} className="bg-[#0f0f0f]/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-8 md:p-10 space-y-8 sticky top-32">
-              <div className="space-y-4 text-center">
-                <h3 className="text-xl font-serif font-bold text-white">Deixe sua Impressão</h3>
-                <div className="flex items-center justify-center gap-3">
+            <form
+              onSubmit={submitReview}
+              className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-5 lg:sticky lg:top-28"
+            >
+              <div className="space-y-3">
+                <h3 className="text-base font-bold text-slate-900">Avalie este produto</h3>
+                <div className="flex items-center gap-1" role="radiogroup" aria-label="Nota">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <button 
-                      key={s} 
+                    <motion.button
+                      key={s}
                       type="button"
+                      role="radio"
+                      aria-checked={rating === s}
+                      aria-label={`${s} ${s === 1 ? 'estrela' : 'estrelas'}`}
                       onClick={() => setRating(s)}
-                      className="transition-all hover:scale-125 focus:outline-none"
+                      whileTap={{ scale: 0.85 }}
+                      transition={spring.snappy}
+                      className="h-11 w-11 flex items-center justify-center rounded-full hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                     >
-                      <Star className={`w-8 h-8 ${s <= rating ? 'text-[#d4af37] fill-[#d4af37]' : 'text-white/10 hover:text-[#d4af37]/40'}`} />
-                    </button>
+                      <Star className={`w-7 h-7 ${s <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`} />
+                    </motion.button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Textarea 
-                  placeholder="Como foi sua experiência com este acessório?"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="bg-black/60 border-white/10 rounded-3xl min-h-[150px] p-6 text-white focus:border-[#d4af37]/40 transition-all resize-none"
-                />
-              </div>
+              <Textarea
+                placeholder="Como foi a sua experiência com o produto?"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="bg-slate-100 border-slate-200 rounded-xl min-h-[130px] p-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-100 focus-visible:border-blue-500 resize-none"
+              />
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#d4af37] text-black hover:bg-[#f2ca50] h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-3"
+                className="w-full h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2"
               >
-                {isSubmitting ? 'Enviando...' : 'Publicar Avaliação'}
-                <Send className="w-4 h-4" />
+                {isSubmitting ? 'Enviando...' : 'Publicar avaliação'}
+                <Send className="w-4 h-4" aria-hidden="true" />
               </Button>
             </form>
           ) : (
-            <div className="bg-[#0f0f0f]/40 backdrop-blur-2xl border border-white/5 rounded-[40px] p-12 text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/10 mx-auto">
-                <MessageSquare className="w-8 h-8" />
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center space-y-4">
+              <div className="h-14 w-14 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 mx-auto">
+                <MessageSquare className="w-6 h-6" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-serif font-bold text-white">Compartilhe sua Opinião</h3>
-              <p className="text-sm text-white/30">Apenas clientes autenticados podem deixar avaliações sobre nossos produtos exclusivos.</p>
-              <Button 
-                variant="outline" 
-                className="border-white/10 text-white rounded-full px-8 h-12 uppercase text-[10px] font-black tracking-widest"
-                onClick={() => window.location.href = '/login'}
+              <h3 className="text-base font-bold text-slate-900">Avalie este produto</h3>
+              <p className="text-sm text-slate-500">Entre na sua conta para deixar uma avaliação.</p>
+              <Button
+                variant="outline"
+                className="h-11 px-6 rounded-full border-slate-200 text-slate-900 font-semibold hover:bg-white"
+                onClick={() => (window.location.href = '/login')}
               >
-                Fazer Login
+                Entrar
               </Button>
             </div>
           )}
         </div>
 
-        {/* Reviews List — first on mobile */}
-        <div className="lg:col-span-7 space-y-8 order-1 lg:order-2">
-          
+        {/* Lista — primeiro no mobile */}
+        <div className="lg:col-span-7 space-y-3 order-1 lg:order-2">
           {isLoading ? (
-            [1, 2].map(i => <div key={i} className="h-40 bg-white/5 rounded-3xl animate-pulse"></div>)
+            [1, 2].map((i) => <div key={i} className="h-36 rounded-2xl skeleton" aria-hidden="true" />)
           ) : reviews.length > 0 ? (
             reviews.map((review) => (
-              <div key={review.id} className="bg-white/[0.02] border border-white/5 rounded-[32px] p-8 space-y-6 transition-all hover:bg-white/[0.04]">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#d4af37]/10 flex items-center justify-center text-[#d4af37] border border-[#d4af37]/20 overflow-hidden">
+              <article key={review.id} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-11 w-11 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 overflow-hidden">
                       {review.user?.avatar_url ? (
-                        <img src={review.user.avatar_url} alt="" className="w-full h-full object-cover" />
+                        <img src={review.user.avatar_url} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <User className="w-6 h-6" />
+                        <User className="w-5 h-5" aria-hidden="true" />
                       )}
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm uppercase tracking-tight flex items-center gap-2">
-                        {review.user?.full_name || 'Cliente Premium'}
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#d4af37]" />
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-slate-900 truncate">
+                        {review.user?.full_name?.trim() || 'Cliente'}
                       </h4>
-                      <span className="text-[10px] font-black text-white/20 uppercase tracking-widest flex items-center gap-2 mt-1">
-                        <Calendar className="w-3 h-3" />
+                      <span className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="w-3 h-3" aria-hidden="true" />
                         {format(new Date(review.created_at), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-3.5 h-3.5 ${s <= review.rating ? 'text-[#d4af37] fill-[#d4af37]' : 'text-white/10'}`} />
-                    ))}
-                  </div>
+                  <Stars value={review.rating} className="w-3.5 h-3.5" />
                 </div>
-                
-                <p className="text-white/60 text-sm leading-relaxed italic">
-                  "{review.comment}"
-                </p>
-              </div>
+                <p className="text-sm text-slate-600 leading-relaxed">{review.comment}</p>
+              </article>
             ))
           ) : (
-            <div className="py-24 text-center space-y-6 bg-white/[0.01] border border-dashed border-white/5 rounded-[40px]">
-              <p className="text-white/20 text-sm italic">Seja o primeiro a avaliar este item da coleção.</p>
+            <div className="py-14 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+              <p className="text-sm text-slate-500">Seja o primeiro a avaliar este produto.</p>
             </div>
           )}
         </div>

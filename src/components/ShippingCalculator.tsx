@@ -20,13 +20,15 @@ interface EdgeFunctionResponse {
   error?: string;
 }
 
+const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 const ResultSkeleton = () => (
-  <div aria-hidden="true" className="space-y-2 animate-pulse">
-    <div className="h-3 bg-white/5 rounded w-40" />
-    <div className="h-12 bg-white/5 rounded-xl" />
-    <div className="h-12 bg-white/5 rounded-xl" />
+  <div aria-hidden="true" className="space-y-2">
+    <div className="h-3 w-40 rounded skeleton" />
+    <div className="h-14 rounded-xl skeleton" />
+    <div className="h-14 rounded-xl skeleton" />
   </div>
 );
 
@@ -68,7 +70,7 @@ export const ShippingCalculator: React.FC<Props> = ({
         { body: { cep: rawCep, productValue: totalValue, source, items } },
       );
 
-      // Guard against stale responses if the user typed a different CEP
+      // Ignora resposta atrasada se o usuário já digitou outro CEP
       if (latestCepRef.current !== rawCep) return;
 
       if (fnError || !data) {
@@ -115,17 +117,15 @@ export const ShippingCalculator: React.FC<Props> = ({
 
   return (
     <div className="space-y-3">
-      {/* Label */}
       <div className="flex items-center gap-2">
-        <Truck className="w-4 h-4 text-[#d4af37] shrink-0" aria-hidden="true" />
-        <span id="shipping-calc-label" className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-          Calcular Frete
+        <Truck className="w-4 h-4 text-blue-600 shrink-0" aria-hidden="true" />
+        <span id="shipping-calc-label" className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+          Calcular frete
         </span>
       </div>
 
-      {/* Input */}
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20 pointer-events-none" aria-hidden="true" />
+        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" aria-hidden="true" />
         <input
           type="text"
           inputMode="numeric"
@@ -138,79 +138,67 @@ export const ShippingCalculator: React.FC<Props> = ({
           aria-busy={loading}
           aria-describedby={error ? 'shipping-error' : undefined}
           autoComplete="postal-code"
-          className="w-full bg-white/[0.04] border border-white/10 focus:border-[#d4af37]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37]/30 pl-9 pr-10 h-10 rounded-xl text-white placeholder:text-white/20 transition-colors text-sm font-mono tracking-widest"
+          className="w-full h-11 pl-10 pr-10 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 tracking-widest outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition"
         />
         {loading && (
-          <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#d4af37] animate-spin" aria-hidden="true" />
+          <RefreshCw className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600 animate-spin" aria-hidden="true" />
         )}
         {!loading && options && (
-          <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500" aria-hidden="true" />
+          <CheckCircle2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" aria-hidden="true" />
         )}
         {!loading && error && (
-          <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-red-400" aria-hidden="true" />
+          <AlertCircle className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-500" aria-hidden="true" />
         )}
       </div>
 
-      {/* Error */}
       {error && (
         <div className="flex items-center gap-2" role="alert">
-          <p id="shipping-error" className="text-red-400 text-[10px] font-medium flex-1">{error}</p>
+          <p id="shipping-error" className="text-rose-600 text-xs font-medium flex-1">{error}</p>
           <button
             onClick={handleRetry}
             aria-label="Tentar novamente"
-            className="text-red-400/60 hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 rounded p-0.5"
+            className="h-9 w-9 rounded-full flex items-center justify-center text-rose-600 hover:bg-rose-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
           >
-            <RefreshCw className="w-3 h-3" />
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* Skeleton while loading */}
       {loading && <ResultSkeleton />}
 
-      {/* Results */}
       <div role="region" aria-live="polite" aria-label="Opções de frete">
         {options && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-400">
+          <div className="space-y-2">
             {locationLabel && (
-              <p className="text-[10px] text-white/30 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" aria-hidden="true" />
-                Entregando em{' '}
-                <span className="text-white/50 font-bold">{locationLabel}</span>
+              <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-hidden="true" />
+                Entregando em <span className="font-semibold text-slate-900">{locationLabel}</span>
               </p>
             )}
 
             {options.map((opt, i) => (
               <div
                 key={i}
-                className={`flex items-start justify-between px-4 py-3 rounded-xl border transition-all ${
-                  opt.highlight
-                    ? 'bg-[#d4af37]/5 border-[#d4af37]/30'
-                    : 'bg-white/[0.02] border-white/5'
+                className={`flex items-start justify-between gap-3 px-4 py-3 rounded-xl border ${
+                  opt.highlight ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'
                 }`}
               >
-                <div>
-                  <p className={`text-[10px] font-black uppercase tracking-wider ${opt.highlight ? 'text-[#d4af37]' : 'text-white/50'}`}>
-                    {opt.name}
-                  </p>
-                  <p className="text-[9px] text-white/25 mt-0.5">{opt.days}</p>
-                  <p className="text-[9px] text-white/30 mt-0.5 font-medium">{opt.arrivalLabel}</p>
+                <div className="min-w-0">
+                  <p className={`text-sm font-semibold ${opt.highlight ? 'text-blue-700' : 'text-slate-900'}`}>{opt.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{opt.days}</p>
+                  <p className="text-xs text-slate-500">{opt.arrivalLabel}</p>
                 </div>
                 <span
-                  className={`text-sm font-black tabular-nums shrink-0 mt-0.5 ${opt.price === 0 ? 'text-green-400' : 'text-white'}`}
-                  aria-label={opt.price === 0 ? 'Grátis' : `R$ ${opt.price.toFixed(2).replace('.', ',')}`}
+                  className={`text-sm font-bold tabular-nums shrink-0 ${opt.price === 0 ? 'text-emerald-600' : 'text-slate-900'}`}
                 >
-                  {opt.price === 0 ? 'GRÁTIS' : `R$ ${opt.price.toFixed(2).replace('.', ',')}`}
+                  {opt.price === 0 ? 'Grátis' : brl(opt.price)}
                 </span>
               </div>
             ))}
 
             {totalValue < freeThreshold && (
-              <p className="text-[9px] text-white/20 text-center pt-1">
-                Frete grátis acima de{' '}
-                <span className="text-[#d4af37]/60">
-                  R$ {freeThreshold.toLocaleString('pt-BR')}
-                </span>
+              <p className="text-xs text-slate-400 text-center pt-1">
+                Frete grátis acima de <span className="font-semibold text-slate-600">{brl(freeThreshold)}</span>
               </p>
             )}
           </div>

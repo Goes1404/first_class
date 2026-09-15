@@ -11,29 +11,27 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { GoldenBlob } from '@/components/animations/GoldenBlob';
-import { Magnetic } from '@/components/animations/Magnetic';
-import { TrackingIn } from '@/components/animations/Reveal';
+import { spring, easing } from '@/lib/motion';
 import {
   Search, SlidersHorizontal, Phone, Watch, Headphones,
-  Shield, Zap, LayoutGrid, Bot, X, RefreshCcw, Sparkles, Tag,
+  Shield, Zap, LayoutGrid, Bot, X, RefreshCcw, Tag, PackageSearch,
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 
 // Busca insensível a acentos (pt-BR): "fone bluetooth" encontra "Fone via Bluetooth"
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-// ─── Category pills data ──────────────────────────────────────────────────────
+// ─── Categorias conhecidas (ícone) ────────────────────────────────────────────
 const CATEGORIES = [
-  { label: 'Todos',      value: '',            icon: LayoutGrid },
-  { label: 'Smartphones', value: 'Smartphone', icon: Phone },
-  { label: 'Watches',    value: 'Watch',       icon: Watch },
-  { label: 'Audio',      value: 'Audio',       icon: Headphones },
-  { label: 'Proteção',   value: 'Protection',  icon: Shield },
-  { label: 'Energia',    value: 'Power',       icon: Zap },
+  { label: 'Todos',       value: '',            icon: LayoutGrid },
+  { label: 'Smartphones', value: 'Smartphone',  icon: Phone },
+  { label: 'Relógios',    value: 'Watch',       icon: Watch },
+  { label: 'Áudio',       value: 'Audio',       icon: Headphones },
+  { label: 'Proteção',    value: 'Protection',  icon: Shield },
+  { label: 'Energia',     value: 'Power',       icon: Zap },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Página ───────────────────────────────────────────────────────────────────
 const Products: React.FC = () => {
   const { usePageVisit } = useAnalytics();
   usePageVisit('products');
@@ -148,149 +146,143 @@ const Products: React.FC = () => {
     return [...base, ...extras];
   }, [dynamicCategories]);
 
+  // Contagem por categoria, para o balão mostrar quantos produtos há em cada
+  const countByCategory = useMemo(() => {
+    const map: Record<string, number> = { '': products.length };
+    for (const p of products) if (p.category) map[p.category] = (map[p.category] ?? 0) + 1;
+    return map;
+  }, [products]);
+
   // Paginação client-side: renderiza 24 por vez (catálogos grandes não travam o grid)
   const PAGE_SIZE = 24;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [filters, aiMatchIds]);
 
-  const hasActiveFilters = filters.search || filters.category || filters.inStockOnly || filters.featuredOnly;
   const activeFilterCount = [filters.inStockOnly, filters.featuredOnly, !!filters.category].filter(Boolean).length;
 
   return (
-    <div className="lumina-grain relative min-h-screen bg-[#050505] text-[#e2e2e2] overflow-hidden selection:bg-[#f2ca50]/30 selection:text-[#f2ca50]">
+    <div className="min-h-screen bg-white text-slate-900">
       <SEO title="Produtos" description="Acessórios e produtos variados com ótimos preços. Compre com PIX ou cartão e receba rapidamente." />
       <Header />
 
-      {/* ── Layered background ── */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        {/* Top gold wash */}
-        <div className="absolute inset-x-0 top-0 h-[60vh] bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,rgba(212,175,55,0.10),transparent_70%)]" />
-        {/* Bottom vignette for depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.6)_100%)]" />
-        {/* Animated golden blobs */}
-        <GoldenBlob className="-top-[10%] -left-[15%]" size={520} opacity={0.08} duration={16} />
-        <GoldenBlob className="top-[55%] -right-[20%]" size={620} opacity={0.05} duration={20}
-          xPath={[0, -60, 50, -30, 0]} yPath={[0, 50, -40, 30, 0]} />
-      </div>
-
-      {/* ── Editorial hero band ── */}
-      <header className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-10 md:pt-36 md:pb-14 text-center">
+      {/* ── Abertura ── */}
+      <header className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-5">
         <motion.span
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: easing.smooth }}
+          className="block text-[10px] font-bold uppercase tracking-[0.25em] text-blue-600"
+        >
+          {STORE.name}
+        </motion.span>
+        <motion.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2 px-3.5 h-8 rounded-full border border-[#d4af37]/25 bg-[#d4af37]/[0.06] backdrop-blur-md"
+          transition={{ duration: 0.5, delay: 0.05, ease: easing.smooth }}
+          className="mt-2 text-[44px] sm:text-[56px] leading-[0.9] font-bold tracking-[-0.045em] text-slate-900"
         >
-          <Sparkles className="w-3 h-3 text-[#d4af37]" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d4af37]">{STORE.name}</span>
-        </motion.span>
-
-        <h1 className="mt-5 font-serif font-bold leading-[0.95] tracking-tight text-white text-[clamp(2.4rem,9vw,5.5rem)]">
-          <TrackingIn text="Acessórios" stagger={0.04} />
-          <br />
-          <span className="text-[#d4af37] italic font-light">
-            <TrackingIn text="para quem exige o melhor" stagger={0.03} delay={0.25} />
-          </span>
-        </h1>
-
+          TODOS OS
+          <span className="block text-blue-600">PRODUTOS.</span>
+        </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="mx-auto mt-5 max-w-md text-sm text-white/40 leading-relaxed"
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="mt-3 max-w-md text-sm text-slate-500 leading-relaxed"
         >
-          Acessórios e produtos variados com ótimos preços — com entrega rápida para todo o Brasil.
+          Acessórios e produtos variados com ótimos preços — entrega rápida para todo o Brasil.
         </motion.p>
-
-        {/* Thin gold rule */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.8, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mt-8 h-px w-40 origin-center bg-gradient-to-r from-transparent via-[#d4af37]/60 to-transparent"
-        />
       </header>
 
-      {/* ── Sticky top bar (search + filters) ── */}
-      <div className="sticky top-14 md:top-16 z-30 bg-[#060606]/85 backdrop-blur-xl border-y border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center gap-2">
-
-          {/* Search */}
+      {/* ── Barra fixa: busca + filtros + balões ── */}
+      <div className="sticky top-[60px] md:top-[64px] z-30 bg-white/90 backdrop-blur-xl border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors pointer-events-none
-              ${isAiSearching ? 'text-[#d4af37] animate-pulse' : 'text-white/25'}`} />
+            <Search
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-colors ${
+                isAiSearching ? 'text-blue-600' : 'text-slate-400'
+              }`}
+            />
             <input
               ref={searchRef}
               type="search"
-              placeholder="Buscar produto ou intenção..."
+              placeholder="Buscar produto..."
               value={filters.search}
               onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
               aria-label="Buscar produtos"
-              className="w-full h-10 bg-white/[0.06] border border-white/[0.08] focus:border-[#d4af37]/40
-                pl-10 pr-10 rounded-xl text-sm text-white placeholder:text-white/20
-                outline-none transition-all [&::-webkit-search-cancel-button]:hidden"
+              className="w-full h-11 pl-10 pr-10 rounded-full bg-slate-100 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition [&::-webkit-search-cancel-button]:hidden"
             />
             {filters.search && !isAiSearching && (
               <button
                 onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
                 aria-label="Limpar busca"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
             {isAiSearching && (
-              <RefreshCcw className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#d4af37] animate-spin" />
+              <RefreshCcw className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600 animate-spin" />
             )}
           </div>
 
-          {/* Advanced filters sheet */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className={`relative shrink-0 flex items-center gap-2 h-10 px-4 rounded-xl border text-[11px] font-black uppercase tracking-widest transition-all active:scale-95
-                ${activeFilterCount > 0
-                  ? 'bg-[#d4af37]/10 border-[#d4af37]/40 text-[#d4af37]'
-                  : 'bg-white/[0.06] border-white/10 text-white/50 hover:text-white/80'}`}>
-                <SlidersHorizontal className="w-3.5 h-3.5" />
+              <button
+                aria-label={activeFilterCount > 0 ? `Filtros, ${activeFilterCount} ativos` : 'Filtros'}
+                className={`relative shrink-0 flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-semibold transition-all active:scale-95 ${
+                  activeFilterCount > 0
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
                 <span className="hidden sm:inline">Filtros</span>
                 {activeFilterCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#d4af37] text-black text-[9px] font-black flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl max-h-[90vh] overflow-y-auto pb-safe">
+            <SheetContent side="bottom" className="bg-white border-t border-slate-200 rounded-t-3xl max-h-[90vh] overflow-y-auto pb-safe">
               <SheetHeader className="pb-4">
-                <SheetTitle className="text-white text-left text-lg font-serif">Filtros Avançados</SheetTitle>
+                <SheetTitle className="text-left text-lg font-bold text-slate-900">Filtros</SheetTitle>
               </SheetHeader>
               <ProductFilters filters={filters} onFiltersChange={setFilters} categories={dynamicCategories} priceRange={priceRange} />
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* ── Category pills ── */}
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 px-3 sm:px-6 pb-3 w-max min-w-full">
-            {pillCategories.map(({ label, value, icon: Icon }, i) => {
+        {/* Balões de categoria */}
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-2 px-4 sm:px-6 pb-3 w-max min-w-full">
+            {pillCategories.map(({ label, value, icon: Icon }) => {
               const active = filters.category === value;
+              const count = countByCategory[value] ?? 0;
               return (
                 <motion.button
                   key={value}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * i, duration: 0.4 }}
-                  whileHover={{ scale: 1.06 }}
+                  type="button"
                   whileTap={{ scale: 0.94 }}
+                  transition={spring.snappy}
+                  aria-pressed={active}
                   onClick={() => setFilters(prev => ({ ...prev, category: prev.category === value ? '' : value }))}
-                  className={`shrink-0 flex items-center gap-1.5 h-8 px-3.5 rounded-full text-[11px] font-black uppercase tracking-widest
-                    border
-                    ${active
-                      ? 'bg-[#d4af37] text-black border-[#d4af37] shadow-[0_4px_20px_-2px_rgba(212,175,55,0.6)]'
-                      : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:text-white/80 hover:border-[#d4af37]/30'}`}
+                  className={`shrink-0 h-11 pl-3.5 pr-2 rounded-full text-[13px] font-semibold flex items-center gap-2 border transition-all ${
+                    active
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/25'
+                      : 'bg-white text-slate-600 border-slate-200 shadow-sm hover:border-slate-400'
+                  }`}
                 >
-                  <Icon className={`w-3 h-3 ${active ? '' : 'text-[#d4af37]/70'}`} />
-                  {label}
+                  <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
+                  <span className="whitespace-nowrap">{label}</span>
+                  <span
+                    className={`min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                      active ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {count}
+                  </span>
                 </motion.button>
               );
             })}
@@ -298,71 +290,71 @@ const Products: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Main content ── */}
-      <main id="conteudo" tabIndex={-1} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-7 sm:pt-9 pb-36">
-
-        {/* Result count + sort */}
+      {/* ── Conteúdo ── */}
+      <main id="conteudo" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-36">
         {!isLoading && (
-          <div className="flex items-center justify-between mb-5 sm:mb-7">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/25">
-              {filteredProducts.length}{' '}
+          <div className="flex items-center justify-between gap-4 mb-4 sm:mb-6">
+            <p className="text-sm text-slate-500">
+              <span className="font-semibold text-slate-900">{filteredProducts.length}</span>{' '}
               {filteredProducts.length === 1 ? 'produto' : 'produtos'}
-              {filters.category && <span className="text-[#d4af37]/60"> · {filters.category}</span>}
-              {aiMatchIds && filters.search && (
-                <span className="ml-2 text-[#d4af37]/50">· busca inteligente</span>
-              )}
+              {filters.category && <span> em <span className="font-semibold text-slate-700">{filters.category}</span></span>}
+              {aiMatchIds && filters.search && <span className="text-blue-600"> · busca inteligente</span>}
             </p>
 
-            <select
-              value={filters.sortBy}
-              onChange={e => setFilters(prev => ({ ...prev, sortBy: e.target.value as FilterState['sortBy'] }))}
-              className="text-[10px] font-black uppercase tracking-widest text-white/40
-                bg-transparent border-none outline-none cursor-pointer hover:text-white/70 transition-colors"
-            >
-              <option value="created_at_desc">Mais recentes</option>
-              <option value="price_asc">Menor preço</option>
-              <option value="price_desc">Maior preço</option>
-              <option value="name_asc">A–Z</option>
-            </select>
+            <label className="flex items-center gap-2 text-sm text-slate-500">
+              <span className="hidden sm:inline">Ordenar</span>
+              <select
+                value={filters.sortBy}
+                onChange={e => setFilters(prev => ({ ...prev, sortBy: e.target.value as FilterState['sortBy'] }))}
+                aria-label="Ordenar produtos"
+                className="h-10 pl-3 pr-8 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+              >
+                <option value="created_at_desc">Mais recentes</option>
+                <option value="price_asc">Menor preço</option>
+                <option value="price_desc">Maior preço</option>
+                <option value="name_asc">A–Z</option>
+              </select>
+            </label>
           </div>
         )}
 
-        {/* Active search banner */}
+        {/* Faixa da busca ativa */}
         {filters.search && (
-          <div className="flex items-center gap-3 mb-4 px-4 py-2.5 rounded-xl bg-[#d4af37]/[0.06] border border-[#d4af37]/15">
+          <div className="flex items-center gap-3 mb-4 px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-100">
             {isAiSearching
-              ? <RefreshCcw className="w-3.5 h-3.5 text-[#d4af37] animate-spin shrink-0" />
-              : <Bot className="w-3.5 h-3.5 text-[#d4af37] shrink-0" />}
-            <p className="text-[11px] text-white/50 flex-1">
+              ? <RefreshCcw className="w-4 h-4 text-blue-600 animate-spin shrink-0" aria-hidden="true" />
+              : <Bot className="w-4 h-4 text-blue-600 shrink-0" aria-hidden="true" />}
+            <p className="text-sm text-slate-700 flex-1">
               {isAiSearching
                 ? 'Buscando…'
                 : aiMatchIds
-                  ? `Resultados para "${filters.search}"`
-                  : `Buscando por "${filters.search}"`}
+                  ? <>Resultados para <span className="font-semibold">"{filters.search}"</span></>
+                  : <>Buscando por <span className="font-semibold">"{filters.search}"</span></>}
             </p>
             <button
               onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
-              className="text-white/25 hover:text-white/60"
+              aria-label="Limpar busca"
+              className="h-9 w-9 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4" aria-busy="true">
             {[...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 index={index}
                 className={
-                  // First featured product gets a wide bento card (spans 2 cols)
+                  // O primeiro destaque, sem filtro, vira o card largo (2 colunas)
                   index === 0 && !filters.search && !filters.category && product.is_featured
                     ? 'col-span-2 md:col-span-2'
                     : ''
@@ -371,33 +363,29 @@ const Products: React.FC = () => {
             ))}
           </div>
         ) : null}
+
         {!isLoading && filteredProducts.length > visibleCount && (
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-8">
             <Button
               onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-              className="h-11 px-8 rounded-full bg-white/[0.06] border border-[#d4af37]/25 text-[#d4af37] font-black text-[10px] uppercase tracking-widest hover:bg-[#d4af37]/10"
+              className="h-11 px-6 rounded-full bg-white border border-slate-200 text-slate-800 font-semibold text-sm hover:border-blue-300 hover:bg-blue-50"
             >
               Carregar mais ({filteredProducts.length - visibleCount} restantes)
             </Button>
           </div>
         )}
+
         {!isLoading && filteredProducts.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#d4af37]/[0.06] border border-[#d4af37]/10 flex items-center justify-center mb-5">
-              <Bot className="w-7 h-7 text-[#d4af37]/30" />
-            </div>
-            <h3 className="text-xl font-serif font-bold text-white mb-2">
-              Nenhum resultado
-            </h3>
-            <p className="text-white/25 text-sm mb-8 max-w-xs">
-              Tente mudar os filtros ou buscar por algo diferente.
-            </p>
+          <div className="rounded-2xl border border-slate-200 bg-white py-16 px-6 flex flex-col items-center text-center gap-2">
+            <PackageSearch className="h-8 w-8 text-slate-300" aria-hidden="true" />
+            <h3 className="text-base font-bold text-slate-900">Nenhum produto encontrado</h3>
+            <p className="text-sm text-slate-500 max-w-xs">Tente mudar os filtros ou buscar por algo diferente.</p>
             <Button
               onClick={() => setFilters(prev => ({ ...prev, search: '', category: '', inStockOnly: false, featuredOnly: false }))}
-              className="h-11 px-8 rounded-full bg-white/[0.06] border border-white/10 text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10"
+              className="mt-3 h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm"
             >
-              <X className="w-3.5 h-3.5 mr-2" />
-              Limpar Filtros
+              <X className="w-4 h-4 mr-1.5" aria-hidden="true" />
+              Limpar filtros
             </Button>
           </div>
         )}

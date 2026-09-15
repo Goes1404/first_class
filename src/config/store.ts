@@ -42,7 +42,7 @@ export const STORE = {
     background: "#050505",
     surface: "#0f0f0f",
     surfaceAlt: "#0a0a0a",
-    pwaTheme: "#0a0a0a",
+    pwaTheme: "#ffffff",
   },
 
   seo: {
