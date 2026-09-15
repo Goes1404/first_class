@@ -1,0 +1,39 @@
+project_id = "kpjmjwxcpzcipcxunthq"
+
+# ── Edge Functions ───────────────────────────────────────────────────────────
+# Webhooks recebem chamadas externas (Mercado Pago, Stripe) que NÃO enviam o
+# JWT do Supabase, portanto a verificação de JWT precisa ficar desligada nelas.
+# As funções validam a autenticidade por conta própria (assinatura HMAC).
+[functions.mp-webhook]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+# Funções chamadas pelo frontend em checkout de convidado (guest).
+# O projeto usa o NOVO formato de API key do Supabase (sb_publishable_…), que
+# NÃO é um JWT. Com verify_jwt = true o gateway rejeita a chamada do convidado
+# antes da função rodar (UNAUTHORIZED_INVALID_JWT_FORMAT / "Invalid JWT").
+# Por isso a verificação fica desligada: a segurança real é feita DENTRO da
+# função — exige header de authorization, valida que o pedido existe e está
+# "Aguardando Pagamento", e usa o total vindo do banco (não confia no frontend).
+[functions.create-pix-payment]
+verify_jwt = false
+
+[functions.create-stripe-payment]
+verify_jwt = false
+
+# Cálculo de frete também é chamado por convidado no checkout.
+[functions.shipping-calculate]
+verify_jwt = false
+
+# OAuth do MercadoPago Marketplace (split 10/90 do PIX).
+# mp-oauth-start: chamado pelo painel admin; valida is_admin DENTRO da função
+# (o projeto usa apikey sb_publishable_, que não é JWT, então verify_jwt=false).
+[functions.mp-oauth-start]
+verify_jwt = false
+
+# mp-oauth-callback: o MercadoPago redireciona o navegador do lojista para cá
+# (sem JWT). A segurança vem da validação do `state` gerado no mp-oauth-start.
+[functions.mp-oauth-callback]
+verify_jwt = false

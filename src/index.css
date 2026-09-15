@@ -1,0 +1,319 @@
+/* Fonts are loaded via <link> in index.html for zero-FOUT */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Brand tokens — sobrescritos pelo ThemeProvider em runtime ── */
+    --brand-primary: #d4af37;
+    --brand-primary-light: #f2ca50;
+    --brand-primary-dark: #b8960d;
+    --brand-bg: #050505;
+    --brand-surface: #0f0f0f;
+    --brand-surface-alt: #0a0a0a;
+
+    /* LUMINA TECH - Deep Black & Classic Gold */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 2%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 2%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Classic Gold #D4AF37 */
+    --primary: 45 64% 52%;
+    --primary-foreground: 0 0% 2%;
+
+    --secondary: 0 0% 80%;
+    --secondary-foreground: 0 0% 2%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 45 15% 54%;
+
+    --accent: 45 64% 15%;
+    --accent-foreground: 45 64% 85%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 45 15% 20%;
+    --input: 45 15% 20%;
+    --ring: 45 64% 52%;
+
+    --radius: 0.25rem;
+
+    /* Custom shadows & gradients */
+    --shadow-luxury: 0 0 15px hsla(45, 64%, 52%, 0.2);
+    --shadow-luxury-hover: 0 0 25px hsla(45, 64%, 52%, 0.4);
+  }
+
+  /* ── MODO CLARO — alto contraste para leitura sob luz do sol ── */
+  .light {
+    --brand-bg: #f7f5f0;
+    --brand-surface: #ffffff;
+    --brand-surface-alt: #fbfaf7;
+
+    --background: 40 30% 96%;
+    --foreground: 24 12% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 24 12% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 12% 8%;
+
+    /* Dourado mais escuro p/ contraste em fundo claro */
+    --primary: 45 70% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 24 8% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 40 12% 90%;
+    --muted-foreground: 30 8% 32%;
+
+    --accent: 45 60% 88%;
+    --accent-foreground: 45 80% 18%;
+
+    --destructive: 0 74% 44%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 40 10% 78%;
+    --input: 40 10% 78%;
+    --ring: 45 70% 38%;
+
+    --shadow-luxury: 0 2px 12px rgba(140, 106, 21, 0.15);
+    --shadow-luxury-hover: 0 4px 20px rgba(140, 106, 21, 0.25);
+  }
+
+  .light ::-webkit-scrollbar-track {
+    background: #eceae4;
+  }
+  .light ::-webkit-scrollbar-thumb {
+    background: #cfc9bc;
+    border: 1px solid rgba(140, 106, 21, 0.15);
+  }
+
+  .light .glass {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    /* Trava rolagem horizontal acidental (blobs/decorativos que vazam a tela no mobile) */
+    @apply overflow-x-hidden;
+    max-width: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 20px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .gold-glow {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+  }
+
+  .gold-glow-hover:hover {
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+    border-color: rgba(212, 175, 55, 0.5);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  }
+  
+  .animate-luxury-in {
+    animation: luxuryIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes luxuryIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Renderização adiada de seções fora da viewport (rodapé, blocos longos) */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+
+  /* ─── Lumina Atelier effects ─────────────────────────────────────────── */
+
+  .text-shimmer-gold {
+    background: linear-gradient(
+      135deg,
+      #D4AF37 0%,
+      #F2EA7E 40%,
+      #B8860B 60%,
+      #D4AF37 100%
+    );
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shimmerGold 4s linear infinite;
+  }
+  
+  @keyframes shimmerGold {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  /* Hide scrollbar but keep scroll (category pills, thumbnails) */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Spotlight glow that follows the cursor (CSS vars set in JS) */
+  .lumina-spot {
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(212, 175, 55, 0.18),
+      rgba(212, 175, 55, 0.06) 35%,
+      transparent 60%
+    );
+    mix-blend-mode: screen;
+  }
+
+  /* Diagonal light sweep on hover */
+  .lumina-shine {
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.10) 46%,
+      rgba(255, 245, 214, 0.28) 50%,
+      rgba(255, 255, 255, 0.10) 54%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .lumina-shine { transform: translateX(130%); }
+
+  /* Animated golden ring border for hero / featured frames */
+  .lumina-ring {
+    position: relative;
+  }
+  .lumina-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.6), transparent 40%, transparent 60%, rgba(212,175,55,0.35));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Subtle film grain overlay */
+  .lumina-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lumina-shine { display: none; }
+  }
+
+  /* Mobile: alvos de toque mínimos (WCAG 2.5.5) */
+  @media (max-width: 768px) {
+    button:not(.no-tap-fix),
+    a[role="button"]:not(.no-tap-fix),
+    [role="tab"]:not(.no-tap-fix) {
+      min-height: 44px;
+    }
+  }
+
+  /* Premium glow on focus */
+  *:focus-visible {
+    outline: 2px solid rgba(212, 175, 55, 0.6);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+
+  /* Smooth letter shimmer for premium headings */
+  @keyframes shimmer-gold {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .text-shimmer-gold {
+    background: linear-gradient(110deg, #d4af37 0%, #f2ca50 25%, #fff5d6 50%, #f2ca50 75%, #d4af37 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer-gold 4s ease-in-out infinite;
+  }
+
+  /* Respeita reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

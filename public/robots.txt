@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /perfil
+Disallow: /pedidos
+Disallow: /enderecos
+Disallow: /cupons
+Disallow: /pagamentos
+Disallow: /favoritos
+Disallow: /checkout
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /register
+Disallow: /entrar
+Disallow: /login
+
+Sitemap: https://jracessorios.com/sitemap.xml
