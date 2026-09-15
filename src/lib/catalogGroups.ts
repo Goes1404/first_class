@@ -115,7 +115,7 @@ export const ELECTRONICS: CollectionGroup = {
   seoTitle: 'Celulares, tablets e notebooks | JR Acessórios',
   emptyTitle: 'Nenhum eletrônico cadastrado ainda',
   emptyHint: 'Cadastre produtos numa categoria de celular, tablet ou notebook para eles aparecerem aqui.',
-  hasPurchasePage: false,
+  hasPurchasePage: true,
   matches: isElectronicsCategory,
 };
 

@@ -102,7 +102,7 @@ describe('isAudioCategory', () => {
 });
 
 describe('hasPurchasePage', () => {
-  // Só calçado e roupa têm tela de compra própria; áudio segue em /produto/:id,
+  // Calçado, roupa e eletrônico têm tela de compra própria; áudio segue em /produto/:id,
   // e é isso que o redirecionamento consulta.
   it('marca calçado e roupa, mas não áudio', () => {
     expect(groupForCategory('Tênis')?.hasPurchasePage).toBe(true);
@@ -140,9 +140,9 @@ describe('electronicsKind', () => {
     },
   );
 
-  it('manda eletrônico para /eletronicos, sem tela de compra própria', () => {
+  it('manda eletrônico para /eletronicos, com ficha própria em /eletronicos/:id', () => {
     expect(groupForCategory('iphones')?.slug).toBe('eletronicos');
     expect(groupForCategory('Notebooks')?.slug).toBe('eletronicos');
-    expect(groupForCategory('iphones')?.hasPurchasePage).toBe(false);
+    expect(groupForCategory('iphones')?.hasPurchasePage).toBe(true);
   });
 });

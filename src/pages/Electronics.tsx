@@ -14,7 +14,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { ELECTRONICS, ELECTRONICS_KINDS, electronicsKind, type ElectronicsKind } from '@/lib/catalogGroups';
-import { preloadProducts } from '@/lib/preloadRoutes';
+import { preloadProducts, preloadElectronicsPurchase } from '@/lib/preloadRoutes';
 import { Stagger, StaggerItem } from '@/components/animations/Stagger';
 import { Pop } from '@/components/animations/Pop';
 import { cardHover, cardTap, easing, spring } from '@/lib/motion';
@@ -54,7 +54,8 @@ const RailCard: React.FC<{ product: Product; tint: string; rating?: { avg_rating
   <MotionLink
     whileHover={cardHover}
     whileTap={cardTap}
-    to={`/produto/${product.id}`}
+    to={`/${ELECTRONICS.slug}/${product.id}`}
+    onPointerEnter={preloadElectronicsPurchase}
     className={`group block w-[176px] shrink-0 snap-start rounded-[22px] p-3.5 ${tint} lg:w-auto`}
   >
     <div className="h-[150px] flex items-center justify-center">
@@ -445,7 +446,8 @@ const Electronics: React.FC = () => {
                     {hero.stock > 0 && <ArrowRight className="h-[18px] w-[18px]" aria-hidden="true" />}
                   </motion.button>
                   <Link
-                    to={`/produto/${hero.id}`}
+                    to={`/${ELECTRONICS.slug}/${hero.id}`}
+                    onPointerEnter={preloadElectronicsPurchase}
                     className="mt-3 block text-center text-[11px] font-semibold text-white/60 hover:text-white transition-colors"
                   >
                     Ver ficha completa
