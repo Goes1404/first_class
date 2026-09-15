@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, ImageOff, LayoutGrid } from 'lucide-react';
+import { ArrowUpRight, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useProducts } from '@/hooks/useProducts';
 import { Stagger, StaggerItem } from '@/components/animations/Stagger';
@@ -30,11 +30,15 @@ export const TechCategories: React.FC = () => {
 
   const tiles = React.useMemo(() => {
     if (!products?.length) return [];
+    // As quatro abas aparecem sempre, mesmo sem produto ainda: o lojista vai
+    // preenchendo e a home não fica com um tile solitário no meio da grade.
+    // As que já têm produto vêm primeiro, senão a única cheia cai fora da tela
+    // no trilho horizontal do celular.
     return GROUPS.map(({ group, tint }) => {
       const items = products.filter((p) => group.matches(p.category));
       const cover = items.find((p) => p.is_featured && p.image) ?? items.find((p) => p.image);
       return { group, tint, count: items.length, cover: cover?.image };
-    }).filter((t) => t.count > 0);
+    }).sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
   }, [products]);
 
   // Categorias reais sem aba dedicada, das mais cheias para as mais vazias.
@@ -98,14 +102,16 @@ export const TechCategories: React.FC = () => {
                         className="max-h-full max-w-[80%] object-contain drop-shadow-[0_12px_16px_rgba(15,23,42,0.18)] group-hover:scale-[1.05] transition-transform duration-300"
                       />
                     ) : (
-                      <ImageOff className="h-6 w-6 text-slate-300" aria-hidden="true" />
+                      <span className="inline-flex h-7 items-center rounded-full bg-white/70 px-3 text-[10px] font-extrabold tracking-[0.16em] text-slate-500">
+                        EM BREVE
+                      </span>
                     )}
                   </div>
                   <div className="mt-3 flex items-end justify-between gap-2">
                     <span className="min-w-0">
                       <span className="block text-sm font-bold text-slate-900 tracking-[-0.01em]">{group.title}</span>
                       <span className="block text-[11px] text-slate-500">
-                        {count} {count === 1 ? 'produto' : 'produtos'}
+                        {count > 0 ? `${count} ${count === 1 ? 'produto' : 'produtos'}` : 'em breve'}
                       </span>
                     </span>
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">

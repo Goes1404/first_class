@@ -7,6 +7,7 @@ import {
 import { motion } from 'framer-motion';
 import SEO from '@/components/SEO';
 import { Product } from '@/types/database';
+import { SemFoto } from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -67,10 +68,10 @@ const RailCard: React.FC<{ product: Product; tint: string; rating?: { avg_rating
           className="max-h-full max-w-full object-contain drop-shadow-[0_14px_18px_rgba(15,23,42,0.18)] group-hover:scale-[1.04] transition-transform duration-300"
         />
       ) : (
-        <ImageOff className="h-7 w-7 text-slate-300" aria-hidden="true" />
+        <SemFoto />
       )}
     </div>
-    <span className="mt-2.5 block text-sm font-bold text-slate-900 tracking-[-0.01em] leading-tight line-clamp-1">
+    <span className="mt-2.5 block min-h-[2.2rem] text-sm font-bold text-slate-900 tracking-[-0.01em] leading-tight line-clamp-2">
       {product.name}
     </span>
     <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500 min-h-[16px]">
@@ -119,7 +120,12 @@ const Electronics: React.FC = () => {
     if (!kind || !kinds.some((k) => k.id === kind)) setKind(kinds[0].id);
   }, [kinds, kind]);
 
-  const hero = useMemo(() => items.find((p) => p.is_featured) ?? items[0], [items]);
+  // Nenhum produto marcado como destaque ainda é o caso normal hoje: cai para o
+  // primeiro que tenha foto, porque o palco é feito em volta da imagem.
+  const hero = useMemo(
+    () => items.find((p) => p.is_featured && p.image) ?? items.find((p) => p.image) ?? items[0],
+    [items],
+  );
   const heroRating = hero ? ratings?.[hero.id] : undefined;
   const storages = useMemo(() => hero?.sizes ?? [], [hero]);
   const colors = useMemo(() => hero?.colors ?? [], [hero]);

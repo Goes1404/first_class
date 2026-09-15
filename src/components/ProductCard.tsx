@@ -11,6 +11,14 @@ import { cardHover, cardTap, easing } from '@/lib/motion';
 import { Pop } from '@/components/animations/Pop';
 import { Heart, ShoppingCart, Star, ImageOff } from 'lucide-react';
 
+/** Produto sem foto: um bloco declarado, não um ícone perdido no vazio. */
+export const SemFoto: React.FC = () => (
+  <span className="flex h-[92px] w-[92px] flex-col items-center justify-center gap-1 rounded-2xl bg-white/70 text-slate-400">
+    <ImageOff className="h-5 w-5" aria-hidden="true" />
+    <span className="text-[10px] font-semibold">sem foto</span>
+  </span>
+);
+
 /** Fundos do card, alternados pela posição no grid — mesmo jogo das abas. */
 export const CARD_TINTS = ['bg-slate-100', 'bg-indigo-50', 'bg-sky-50', 'bg-violet-50'];
 
@@ -131,11 +139,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetails
             }`}
           />
         ) : (
-          <ImageOff className="h-8 w-8 text-slate-300" aria-hidden="true" />
+          <SemFoto />
         )}
       </div>
 
-      <h3 className="mt-2.5 line-clamp-1 text-sm font-bold leading-tight tracking-[-0.01em] text-slate-900">
+      {/* Nomes reais do catálogo são longos ("Cordão do Telemóvel Cabo de Dados"):
+          uma linha só truncava tudo em "Cordão do...". */}
+      <h3 className="mt-2.5 line-clamp-2 min-h-[2.2rem] text-sm font-bold leading-tight tracking-[-0.01em] text-slate-900">
         {product.name}
       </h3>
 

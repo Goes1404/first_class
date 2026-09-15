@@ -74,8 +74,8 @@ export const SNEAKERS: CollectionGroup = {
   headline: ['PISE', 'LEVE.'],
   tagline: 'Tênis para treino, corrida e o dia a dia.',
   seoTitle: 'Tênis | JR Acessórios',
-  emptyTitle: 'Nenhum tênis cadastrado ainda',
-  emptyHint: 'Cadastre produtos numa categoria de calçado para eles aparecerem aqui.',
+  emptyTitle: 'Tênis chegando em breve',
+  emptyHint: 'Estamos montando esta seleção. Enquanto isso, veja tudo o que já está na loja.',
   hasPurchasePage: true,
   matches: isSneakerCategory,
 };
@@ -87,8 +87,8 @@ export const APPAREL: CollectionGroup = {
   headline: ['VISTA', 'O SEU.'],
   tagline: 'Peças para o dia a dia, treino e as saídas da semana.',
   seoTitle: 'Roupas | JR Acessórios',
-  emptyTitle: 'Nenhuma peça cadastrada ainda',
-  emptyHint: 'Cadastre produtos numa categoria de roupa para eles aparecerem aqui.',
+  emptyTitle: 'Roupas chegando em breve',
+  emptyHint: 'Estamos montando esta seleção. Enquanto isso, veja tudo o que já está na loja.',
   hasPurchasePage: true,
   matches: isApparelCategory,
 };
@@ -100,8 +100,8 @@ export const AUDIO: CollectionGroup = {
   headline: ['OUÇA', 'CADA DETALHE.'],
   tagline: 'Fones e caixas de som escolhidos pelo que importa: o som.',
   seoTitle: 'Fones de ouvido | JR Acessórios',
-  emptyTitle: 'Nenhum fone cadastrado ainda',
-  emptyHint: 'Cadastre produtos numa categoria de áudio para eles aparecerem aqui.',
+  emptyTitle: 'Fones chegando em breve',
+  emptyHint: 'Estamos montando esta seleção. Enquanto isso, veja tudo o que já está na loja.',
   hasPurchasePage: false,
   matches: isAudioCategory,
 };
@@ -113,8 +113,8 @@ export const ELECTRONICS: CollectionGroup = {
   headline: ['Seu próximo', 'upgrade.'],
   tagline: 'Celulares, tablets e notebooks, no PIX ou em até 10× no cartão.',
   seoTitle: 'Celulares, tablets e notebooks | JR Acessórios',
-  emptyTitle: 'Nenhum eletrônico cadastrado ainda',
-  emptyHint: 'Cadastre produtos numa categoria de celular, tablet ou notebook para eles aparecerem aqui.',
+  emptyTitle: 'Eletrônicos chegando em breve',
+  emptyHint: 'Estamos montando esta seleção. Enquanto isso, veja tudo o que já está na loja.',
   hasPurchasePage: true,
   matches: isElectronicsCategory,
 };

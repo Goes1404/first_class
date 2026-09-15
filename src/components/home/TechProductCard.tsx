@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, ShoppingCart, ImageOff } from 'lucide-react';
+import { Star, ShoppingCart } from 'lucide-react';
 import { cardHover, cardTap } from '@/lib/motion';
 import { Product } from '@/types/database';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { preloadProductDetails } from '@/lib/preloadRoutes';
 import { BADGE_STYLES, type BadgeKind } from './techTheme';
+import { SemFoto } from '@/components/ProductCard';
 
 const MotionLink = motion(Link);
 
@@ -82,11 +83,11 @@ export const TechProductCard: React.FC<Props> = ({ product, rating, badge, tint 
             className="max-h-full max-w-[82%] object-contain drop-shadow-[0_14px_18px_rgba(15,23,42,0.18)] group-hover:scale-[1.04] transition-transform duration-300"
           />
         ) : (
-          <ImageOff className="h-8 w-8 text-slate-300" aria-hidden="true" />
+          <SemFoto />
         )}
       </div>
 
-      <h3 className="mt-2.5 text-sm font-bold leading-tight tracking-[-0.01em] text-slate-900 line-clamp-1">
+      <h3 className="mt-2.5 line-clamp-2 min-h-[2.2rem] text-sm font-bold leading-tight tracking-[-0.01em] text-slate-900">
         {product.name}
       </h3>
 
