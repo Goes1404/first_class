@@ -9,3 +9,4 @@ export const preloadSneakerPurchase = () => import('@/pages/SneakerPurchase');
 export const preloadApparel = () => import('@/pages/Apparel');
 export const preloadApparelPurchase = () => import('@/pages/ApparelPurchase');
 export const preloadAudio = () => import('@/pages/Audio');
+export const preloadElectronics = () => import('@/pages/Electronics');

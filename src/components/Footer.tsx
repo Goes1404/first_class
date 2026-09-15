@@ -19,6 +19,7 @@ const footerLinks = [
   { label: 'Tênis', to: '/tenis' },
   { label: 'Roupas', to: '/roupas' },
   { label: 'Fones', to: '/fones' },
+  { label: 'Eletrônicos', to: '/eletronicos' },
   { label: 'Contato', to: '/contato' },
   { label: 'Minha conta', to: '/perfil' },
 ];

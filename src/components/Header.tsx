@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, User, Menu, Search, Zap, Home, ShoppingBag, Phone, X,
-  Footprints, Shirt, Headphones,
+  Footprints, Shirt, Headphones, Smartphone,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
@@ -18,6 +18,7 @@ const navLinks = [
   { label: 'Tênis', path: '/tenis', icon: Footprints },
   { label: 'Roupas', path: '/roupas', icon: Shirt },
   { label: 'Fones', path: '/fones', icon: Headphones },
+  { label: 'Eletrônicos', path: '/eletronicos', icon: Smartphone },
   { label: 'Contato', path: '/contato', icon: Phone },
 ];
 
@@ -26,6 +27,7 @@ const searchShortcuts = [
   { label: 'Tênis', to: '/tenis' },
   { label: 'Roupas', to: '/roupas' },
   { label: 'Fones', to: '/fones' },
+  { label: 'Eletrônicos', to: '/eletronicos' },
   { label: 'Ver tudo', to: '/produtos' },
 ];
 

@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { isApparelCategory, isAudioCategory, isSneakerCategory, groupForCategory } from '@/lib/catalogGroups';
+import {
+  isApparelCategory, isAudioCategory, isSneakerCategory, isElectronicsCategory, electronicsKind, groupForCategory,
+} from '@/lib/catalogGroups';
 
 // Estes predicados decidem o recorte das abas /tenis e /roupas, o destino do
 // círculo de categoria na home e o redirecionamento de /produto/:id.
@@ -80,7 +82,7 @@ describe('groupForCategory', () => {
 
   it('devolve null para categoria sem aba dedicada', () => {
     expect(groupForCategory('Mouse')).toBeNull();
-    expect(groupForCategory('Smartphone')).toBeNull();
+    expect(groupForCategory('Relógios')).toBeNull();
     expect(groupForCategory(undefined)).toBeNull();
     expect(groupForCategory('')).toBeNull();
   });
@@ -111,5 +113,36 @@ describe('hasPurchasePage', () => {
   it('manda áudio para /fones', () => {
     expect(groupForCategory('Fones de Ouvido')?.slug).toBe('fones');
     expect(groupForCategory('Áudio')?.slug).toBe('fones');
+  });
+});
+
+describe('electronicsKind', () => {
+  it.each([
+    ['iphones', 'celulares'],
+    ['Smartphone', 'celulares'],
+    ['Celulares', 'celulares'],
+    ['Tablets', 'tablets'],
+    ['iPad', 'tablets'],
+    ['Notebooks', 'notebooks'],
+    ['MacBook', 'notebooks'],
+    ['Computadores', 'notebooks'],
+  ] as const)('classifica "%s" como %s', (categoria, recorte) => {
+    expect(electronicsKind(categoria)).toBe(recorte);
+    expect(isElectronicsCategory(categoria)).toBe(true);
+  });
+
+  // "Headphone" tem "phone" dentro: áudio nunca pode virar celular.
+  it.each(['Headphone Bluetooth', 'Fones de Ouvido', 'Mouse', 'Tênis', 'Camisetas', ''])(
+    'não classifica "%s" como eletrônico',
+    (categoria) => {
+      expect(electronicsKind(categoria)).toBeNull();
+      expect(isElectronicsCategory(categoria)).toBe(false);
+    },
+  );
+
+  it('manda eletrônico para /eletronicos, sem tela de compra própria', () => {
+    expect(groupForCategory('iphones')?.slug).toBe('eletronicos');
+    expect(groupForCategory('Notebooks')?.slug).toBe('eletronicos');
+    expect(groupForCategory('iphones')?.hasPurchasePage).toBe(false);
   });
 });

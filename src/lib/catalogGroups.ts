@@ -1,5 +1,5 @@
 /**
- * Grupos do catálogo (calçados, roupas).
+ * Grupos do catálogo (calçados, roupas, áudio, eletrônicos).
  *
  * O catálogo não tem um campo de tipo de produto, então o recorte é feito pelo
  * nome da categoria. Fica num lugar só para as abas, os links da home e os
@@ -23,9 +23,36 @@ export const isApparelCategory = (category?: string | null) =>
 
 export const isAudioCategory = (category?: string | null) => AUDIO_RE.test(category ?? '');
 
+// ─── Eletrônicos ────────────────────────────────────────────────────────────
+// Três recortes dentro da mesma aba; "phone" solto ficou de fora de propósito,
+// senão "Headphone" viraria celular.
+const PHONE_RE = /iphone|celular|smartphone|galaxy|xiaomi|motorola|android/i;
+const TABLET_RE = /tablet|ipad/i;
+const LAPTOP_RE = /notebook|laptop|macbook|computador|desktop|chromebook|\bpcs?\b/i;
+
+export type ElectronicsKind = 'celulares' | 'tablets' | 'notebooks';
+
+export const ELECTRONICS_KINDS: ReadonlyArray<{ id: ElectronicsKind; label: string }> = [
+  { id: 'celulares', label: 'Celulares' },
+  { id: 'tablets', label: 'Tablets' },
+  { id: 'notebooks', label: 'Notebooks' },
+];
+
+/** Recorte de eletrônico da categoria, ou null quando ela não é eletrônico. */
+export const electronicsKind = (category?: string | null): ElectronicsKind | null => {
+  const c = category ?? '';
+  if (isAudioCategory(c)) return null;
+  if (PHONE_RE.test(c)) return 'celulares';
+  if (TABLET_RE.test(c)) return 'tablets';
+  if (LAPTOP_RE.test(c)) return 'notebooks';
+  return null;
+};
+
+export const isElectronicsCategory = (category?: string | null) => electronicsKind(category) !== null;
+
 export interface CollectionGroup {
   /** Prefixo das rotas: /<slug> e, quando houver, /<slug>/:id */
-  slug: 'tenis' | 'roupas' | 'fones';
+  slug: 'tenis' | 'roupas' | 'fones' | 'eletronicos';
   /** Se o grupo tem tela de compra própria — só esses redirecionam /produto/:id. */
   hasPurchasePage: boolean;
   /** Título da barra superior. */
@@ -79,6 +106,19 @@ export const AUDIO: CollectionGroup = {
   matches: isAudioCategory,
 };
 
+export const ELECTRONICS: CollectionGroup = {
+  slug: 'eletronicos',
+  title: 'Eletrônicos',
+  analyticsKey: 'eletronicos',
+  headline: ['Seu próximo', 'upgrade.'],
+  tagline: 'Celulares, tablets e notebooks, no PIX ou em até 10× no cartão.',
+  seoTitle: 'Celulares, tablets e notebooks | JR Acessórios',
+  emptyTitle: 'Nenhum eletrônico cadastrado ainda',
+  emptyHint: 'Cadastre produtos numa categoria de celular, tablet ou notebook para eles aparecerem aqui.',
+  hasPurchasePage: false,
+  matches: isElectronicsCategory,
+};
+
 /** Grupo dono de uma categoria, ou null quando ela não pertence a nenhum. */
 export const groupForCategory = (category?: string | null): CollectionGroup | null =>
   isSneakerCategory(category)
@@ -87,4 +127,6 @@ export const groupForCategory = (category?: string | null): CollectionGroup | nu
       ? APPAREL
       : isAudioCategory(category)
         ? AUDIO
-        : null;
+        : isElectronicsCategory(category)
+          ? ELECTRONICS
+          : null;
