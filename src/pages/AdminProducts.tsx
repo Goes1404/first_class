@@ -75,6 +75,8 @@ const AdminProducts = () => {
     image: '',
     images: [] as string[],
     category: '',
+    brand: '',
+    brand_logo_url: '',
     stock: '999',
     is_featured: false,
     weight: '',
@@ -108,6 +110,12 @@ const AdminProducts = () => {
     [allProducts]
   );
 
+  // Marcas já cadastradas — alimenta as sugestões e evita duplicata por digitação
+  const brands = useMemo(
+    () => [...new Set(allProducts.map(p => p.brand?.trim()).filter(Boolean) as string[])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [allProducts]
+  );
+
   const { totalInventoryCost, totalInventoryRetail, highStockProducts } = useMemo(() => ({
     totalInventoryCost: allProducts.reduce((sum, p) => sum + (p.stock * (p.cost || 0)), 0),
     totalInventoryRetail: allProducts.reduce((sum, p) => sum + (p.stock * p.price), 0),
@@ -124,6 +132,8 @@ const AdminProducts = () => {
       image: '',
       images: [],
       category: '',
+      brand: '',
+      brand_logo_url: '',
       stock: '999',
       is_featured: false,
       weight: '',
@@ -145,6 +155,8 @@ const AdminProducts = () => {
       image: product.image,
       images: product.images || [product.image].filter(Boolean),
       category: product.category || '',
+      brand: product.brand || '',
+      brand_logo_url: product.brand_logo_url || '',
       stock: product.stock.toString(),
       is_featured: product.is_featured,
       weight: product.weight?.toString() || '',
@@ -183,6 +195,8 @@ const AdminProducts = () => {
       image: formData.image || formData.images[0],
       images: formData.images,
       category: normalizeCategory(formData.category),
+      brand: formData.brand.trim() || null,
+      brand_logo_url: formData.brand_logo_url.trim() || null,
       stock,
       is_featured: formData.is_featured,
       weight: parseFloat(formData.weight) || 0.3,
@@ -344,6 +358,49 @@ const AdminProducts = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Marca</Label>
+                    <Input
+                      value={formData.brand}
+                      onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                      list="brand-suggestions"
+                      className="bg-white/5 border-white/10 focus:border-[#d4af37]/40 h-12 rounded-xl"
+                      placeholder="Ex: Nike, Adidas"
+                    />
+                    <datalist id="brand-suggestions">
+                      {brands.map((b) => <option key={b} value={b} />)}
+                    </datalist>
+                    {brands.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {brands.map((b) => (
+                          <button
+                            key={b}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, brand: b })}
+                            className={`max-w-full truncate px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border transition-colors ${
+                              formData.brand === b
+                                ? 'border-[#d4af37]/60 bg-[#d4af37]/10 text-[#d4af37]'
+                                : 'border-white/10 text-white/30 hover:text-white/60 hover:border-white/20'
+                            }`}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Logo da marca (URL)</Label>
+                    <Input
+                      value={formData.brand_logo_url}
+                      onChange={(e) => setFormData({...formData, brand_logo_url: e.target.value})}
+                      className="bg-white/5 border-white/10 focus:border-[#d4af37]/40 h-12 rounded-xl"
+                      placeholder="https://..."
+                    />
+                    <p className="text-[10px] text-white/25 leading-relaxed">
+                      Exibido no filtro de marcas da aba de tênis. Sem logo, aparece a inicial da marca.
+                    </p>
                   </div>
                 </div>
                 

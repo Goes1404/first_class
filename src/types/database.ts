@@ -8,6 +8,8 @@ export interface Product {
   image: string;
   images?: string[];
   category: string;
+  brand?: string;
+  brand_logo_url?: string;
   stock: number;
   is_featured: boolean;
   weight?: number;  // kg — usado no cálculo de frete

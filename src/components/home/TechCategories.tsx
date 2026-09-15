@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 
+/** Categorias de calçado ganham a aba dedicada em vez da listagem genérica. */
+const SNEAKER_RE = /t[eê]nis|cal[çc]ad|sapato|sneaker|chuteira/i;
+
 /** Palavras-chave → ícone. Casamos pelo nome real da categoria no banco,
  *  sem acento e em minúsculas, então "Áudio" e "audio" caem no mesmo ícone. */
 const ICON_RULES: Array<{ match: RegExp; icon: LucideIcon }> = [
@@ -65,7 +68,11 @@ export const TechCategories: React.FC = () => {
   if (!categories.length) return null;
 
   const items = [
-    ...categories.map((name) => ({ label: name, to: `/produtos?category=${encodeURIComponent(name)}`, Icon: iconFor(name) })),
+    ...categories.map((name) => ({
+      label: name,
+      to: SNEAKER_RE.test(name) ? '/tenis' : `/produtos?category=${encodeURIComponent(name)}`,
+      Icon: iconFor(name),
+    })),
     { label: 'Ver tudo', to: '/produtos', Icon: LayoutGrid },
   ];
 
