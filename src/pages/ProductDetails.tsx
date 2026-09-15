@@ -16,7 +16,7 @@ import { GoldenBlob } from '@/components/animations/GoldenBlob';
 import { Magnetic } from '@/components/animations/Magnetic';
 import { Reveal } from '@/components/animations/Reveal';
 import { useCart } from '@/contexts/CartContext';
-import { isSneakerCategory } from '@/lib/sneakers';
+import { groupForCategory } from '@/lib/catalogGroups';
 import { useToast } from '@/hooks/use-toast';
 import { useProduct, useAppSettings } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
@@ -120,7 +120,8 @@ function Gallery({
     const dx = touchStartX.current - e.changedTouches[0].clientX;
     setDragOffset(0);
     if (Math.abs(dx) > 48) {
-      dx > 0 ? next() : prev();
+      if (dx > 0) next();
+      else prev();
     }
   };
 
@@ -140,7 +141,10 @@ function Gallery({
     setIsDragging(false);
     const dx = mouseStartX.current - e.clientX;
     setDragOffset(0);
-    if (Math.abs(dx) > 48) dx > 0 ? next() : prev();
+    if (Math.abs(dx) > 48) {
+      if (dx > 0) next();
+      else prev();
+    }
   };
 
   return (
@@ -285,15 +289,16 @@ const ProductDetails = () => {
   useEffect(() => {
     // Calçado redireciona para /tenis/<id>, que registra a visualização lá —
     // contar aqui também duplicaria a métrica.
-    if (product?.id && !isSneakerCategory(product.category)) trackProductView(product.id);
+    if (product?.id && !groupForCategory(product.category)) trackProductView(product.id);
   }, [product?.id, product?.category, trackProductView]);
 
   if (isLoading) return <LoadingSkeleton />;
 
-  // Calçado tem tela de compra própria (grade de tamanhos, cores, arrastar
-  // para adicionar). Links antigos de /produto/<id> caem lá.
-  if (product && isSneakerCategory(product.category)) {
-    return <Navigate to={`/tenis/${product.id}`} replace />;
+  // Calçado e roupa têm tela de compra própria (grade de tamanhos, cores).
+  // Links antigos de /produto/<id> caem lá.
+  const group = product && groupForCategory(product.category);
+  if (product && group) {
+    return <Navigate to={`/${group.slug}/${product.id}`} replace />;
   }
 
   if (!product) {

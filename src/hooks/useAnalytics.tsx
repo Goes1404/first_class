@@ -29,7 +29,9 @@ export const initGA = () => {
           onLCP(sendToGA);
         });
       }
-    } catch (e) {}
+    } catch {
+      // métrica é acessória: falha ao carregar web-vitals não pode quebrar a página
+    }
   }
 };
 

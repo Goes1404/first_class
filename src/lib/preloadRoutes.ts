@@ -6,3 +6,5 @@ export const preloadProducts = () => import('@/pages/Products');
 export const preloadProductDetails = () => import('@/pages/ProductDetails');
 export const preloadSneakers = () => import('@/pages/Sneakers');
 export const preloadSneakerPurchase = () => import('@/pages/SneakerPurchase');
+export const preloadApparel = () => import('@/pages/Apparel');
+export const preloadApparelPurchase = () => import('@/pages/ApparelPurchase');

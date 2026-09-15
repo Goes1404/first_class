@@ -1,4 +1,4 @@
-import { preloadProducts, preloadProductDetails, preloadSneakers, preloadSneakerPurchase } from "@/lib/preloadRoutes";
+import { preloadProducts, preloadProductDetails, preloadSneakers, preloadSneakerPurchase, preloadApparel, preloadApparelPurchase } from "@/lib/preloadRoutes";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -55,6 +55,8 @@ const Products = lazy(preloadProducts);
 const ProductDetails = lazy(preloadProductDetails);
 const Sneakers = lazy(preloadSneakers);
 const SneakerPurchase = lazy(preloadSneakerPurchase);
+const Apparel = lazy(preloadApparel);
+const ApparelPurchase = lazy(preloadApparelPurchase);
 const Contact = lazy(() => import("./pages/Contact"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -128,6 +130,8 @@ const App = () => (
                       <Route path="/" element={<Index />} />
                       <Route path="/tenis" element={<Sneakers />} />
                       <Route path="/tenis/:id" element={<SneakerPurchase />} />
+                      <Route path="/roupas" element={<Apparel />} />
+                      <Route path="/roupas/:id" element={<ApparelPurchase />} />
                       <Route path="/produtos" element={<Products />} />
                       <Route path="/produto/:id" element={<ProductDetails />} />
                       <Route path="/contato" element={<Contact />} />
