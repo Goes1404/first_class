@@ -5,9 +5,7 @@ import {
   Shield, BatteryCharging, Cable, LayoutGrid, type LucideIcon,
 } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
-
-/** Categorias de calçado ganham a aba dedicada em vez da listagem genérica. */
-const SNEAKER_RE = /t[eê]nis|cal[çc]ad|sapato|sneaker|chuteira/i;
+import { isSneakerCategory } from '@/lib/sneakers';
 
 /** Palavras-chave → ícone. Casamos pelo nome real da categoria no banco,
  *  sem acento e em minúsculas, então "Áudio" e "audio" caem no mesmo ícone. */
@@ -70,7 +68,8 @@ export const TechCategories: React.FC = () => {
   const items = [
     ...categories.map((name) => ({
       label: name,
-      to: SNEAKER_RE.test(name) ? '/tenis' : `/produtos?category=${encodeURIComponent(name)}`,
+      // Categoria de calçado vai para a aba dedicada em vez da listagem genérica.
+      to: isSneakerCategory(name) ? '/tenis' : `/produtos?category=${encodeURIComponent(name)}`,
       Icon: iconFor(name),
     })),
     { label: 'Ver tudo', to: '/produtos', Icon: LayoutGrid },

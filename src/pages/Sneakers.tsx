@@ -8,11 +8,7 @@ import { useProductRatings } from '@/hooks/useProductRatings';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { preloadSneakerPurchase } from '@/lib/preloadRoutes';
-
-/** Categorias que contam como calçado. O recorte é por nome de categoria
- *  porque o catálogo não tem um campo de tipo — ajuste aqui se a loja usar
- *  outra nomenclatura. */
-const SNEAKER_RE = /t[eê]nis|cal[çc]ad|sapato|sneaker|chuteira/i;
+import { isSneakerCategory } from '@/lib/sneakers';
 
 const ALL = '__todos__';
 
@@ -102,7 +98,7 @@ const Sneakers: React.FC = () => {
   const [category, setCategory] = useState<string>(ALL);
 
   const sneakers = useMemo(
-    () => (products ?? []).filter((p) => SNEAKER_RE.test(p.category ?? '')),
+    () => (products ?? []).filter((p) => isSneakerCategory(p.category)),
     [products],
   );
 

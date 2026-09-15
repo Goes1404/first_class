@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Heart, Share2, ShoppingBag, MessageCircle, Shield,
@@ -16,6 +16,7 @@ import { GoldenBlob } from '@/components/animations/GoldenBlob';
 import { Magnetic } from '@/components/animations/Magnetic';
 import { Reveal } from '@/components/animations/Reveal';
 import { useCart } from '@/contexts/CartContext';
+import { isSneakerCategory } from '@/lib/sneakers';
 import { useToast } from '@/hooks/use-toast';
 import { useProduct, useAppSettings } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
@@ -282,10 +283,18 @@ const ProductDetails = () => {
   const { data: ratings } = useProductRatings();
 
   useEffect(() => {
-    if (product?.id) trackProductView(product.id);
-  }, [product?.id, trackProductView]);
+    // Calçado redireciona para /tenis/<id>, que registra a visualização lá —
+    // contar aqui também duplicaria a métrica.
+    if (product?.id && !isSneakerCategory(product.category)) trackProductView(product.id);
+  }, [product?.id, product?.category, trackProductView]);
 
   if (isLoading) return <LoadingSkeleton />;
+
+  // Calçado tem tela de compra própria (grade de tamanhos, cores, arrastar
+  // para adicionar). Links antigos de /produto/<id> caem lá.
+  if (product && isSneakerCategory(product.category)) {
+    return <Navigate to={`/tenis/${product.id}`} replace />;
+  }
 
   if (!product) {
     return (

@@ -47,7 +47,7 @@ const SneakerPurchase: React.FC = () => {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { usePageVisit } = useAnalytics();
+  const { usePageVisit, trackProductView } = useAnalytics();
   usePageVisit('tenis-produto');
 
   const { data: product, isLoading, isError } = useProduct(id);
@@ -67,6 +67,10 @@ const SneakerPurchase: React.FC = () => {
   useEffect(() => {
     if (colors.length === 1) setColor(colors[0].name);
   }, [colors]);
+
+  useEffect(() => {
+    if (product?.id) trackProductView(product.id);
+  }, [product?.id, trackProductView]);
 
   const viewedIds = useRecentlyViewed(product ?? undefined);
   const viewed = useMemo(
