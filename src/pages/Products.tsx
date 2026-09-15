@@ -166,31 +166,37 @@ const Products: React.FC = () => {
       <Header />
 
       {/* ── Abertura ── */}
-      <header className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-5">
+      <header className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 md:pt-28 pb-5">
         <motion.span
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: easing.smooth }}
-          className="block text-[10px] font-bold uppercase tracking-[0.25em] text-blue-600"
+          className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.22em] text-blue-600"
         >
-          {STORE.name}
+          <span className="block h-0.5 w-[18px] rounded bg-blue-600" aria-hidden="true" />
+          Catálogo
         </motion.span>
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.05, ease: easing.smooth }}
-          className="mt-2 text-[44px] sm:text-[56px] leading-[0.9] font-bold tracking-[-0.045em] text-slate-900"
+          className="mt-3 text-[40px] sm:text-[58px] leading-[0.94] font-extrabold tracking-[-0.05em] text-slate-900"
         >
-          TODOS OS
-          <span className="block text-blue-600">PRODUTOS.</span>
+          Todos os
+          <span
+            className="block text-[48px] sm:text-[70px] leading-[0.95] tracking-[-0.02em] text-blue-600"
+            style={{ fontFamily: "'Instrument Serif', Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400 }}
+          >
+            produtos.
+          </span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25, duration: 0.5 }}
-          className="mt-3 max-w-md text-sm text-slate-500 leading-relaxed"
+          className="mt-4 max-w-md text-sm text-slate-500 leading-relaxed"
         >
-          Acessórios e produtos variados com ótimos preços — entrega rápida para todo o Brasil.
+          {STORE.name} — acessórios e eletrônicos com entrega rápida, 5% no PIX e 10× sem juros no cartão.
         </motion.p>
       </header>
 
@@ -268,17 +274,17 @@ const Products: React.FC = () => {
                   transition={spring.snappy}
                   aria-pressed={active}
                   onClick={() => setFilters(prev => ({ ...prev, category: prev.category === value ? '' : value }))}
-                  className={`shrink-0 h-11 pl-3.5 pr-2 rounded-full text-[13px] font-semibold flex items-center gap-2 border transition-all ${
+                  className={`shrink-0 h-11 pl-3.5 pr-2 rounded-full text-[13px] font-bold flex items-center gap-2 transition-all ${
                     active
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/25'
-                      : 'bg-white text-slate-600 border-slate-200 shadow-sm hover:border-slate-400'
+                      ? 'bg-slate-900 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
                   <span className="whitespace-nowrap">{label}</span>
                   <span
                     className={`min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                      active ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
+                      active ? 'bg-white/20 text-white' : 'bg-white text-slate-500'
                     }`}
                   >
                     {count}
@@ -291,7 +297,7 @@ const Products: React.FC = () => {
       </div>
 
       {/* ── Conteúdo ── */}
-      <main id="conteudo" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-36">
+      <main id="conteudo" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-24">
         {!isLoading && (
           <div className="flex items-center justify-between gap-4 mb-4 sm:mb-6">
             <p className="text-sm text-slate-500">
@@ -349,17 +355,7 @@ const Products: React.FC = () => {
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.slice(0, visibleCount).map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={index}
-                className={
-                  // O primeiro destaque, sem filtro, vira o card largo (2 colunas)
-                  index === 0 && !filters.search && !filters.category && product.is_featured
-                    ? 'col-span-2 md:col-span-2'
-                    : ''
-                }
-              />
+              <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
         ) : null}
@@ -368,7 +364,7 @@ const Products: React.FC = () => {
           <div className="flex justify-center mt-8">
             <Button
               onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-              className="h-11 px-6 rounded-full bg-white border border-slate-200 text-slate-800 font-semibold text-sm hover:border-blue-300 hover:bg-blue-50"
+              className="h-12 px-7 rounded-full bg-slate-900 text-white font-bold text-sm hover:bg-slate-800"
             >
               Carregar mais ({filteredProducts.length - visibleCount} restantes)
             </Button>
@@ -376,7 +372,7 @@ const Products: React.FC = () => {
         )}
 
         {!isLoading && filteredProducts.length === 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white py-16 px-6 flex flex-col items-center text-center gap-2">
+          <div className="rounded-[22px] bg-slate-100 py-16 px-6 flex flex-col items-center text-center gap-2">
             <PackageSearch className="h-8 w-8 text-slate-300" aria-hidden="true" />
             <h3 className="text-base font-bold text-slate-900">Nenhum produto encontrado</h3>
             <p className="text-sm text-slate-500 max-w-xs">Tente mudar os filtros ou buscar por algo diferente.</p>

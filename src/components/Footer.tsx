@@ -34,7 +34,6 @@ export const Footer: React.FC = () => {
   const sectionRef = React.useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end end'] });
   const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +87,7 @@ export const Footer: React.FC = () => {
           aria-hidden="true"
         />
 
-        <motion.div style={prefersReducedMotion ? {} : { scale, opacity }} className="relative z-10 px-4">
+        <motion.div style={prefersReducedMotion ? {} : { scale }} className="relative z-10 px-4">
           <h2
             className="font-extrabold text-slate-900 leading-[0.9] tracking-[-0.04em]"
             style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)' }}
