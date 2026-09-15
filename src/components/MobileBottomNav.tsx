@@ -1,71 +1,75 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, Heart, User, ShoppingCart } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, Tag, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { motion } from 'framer-motion';
-import { easing } from '@/lib/motion';
 
 const tabs = [
   { label: 'Início', path: '/', icon: Home },
-  { label: 'Loja', path: '/produtos', icon: ShoppingBag },
-  { label: 'Favoritos', path: '/favoritos', icon: Heart },
+  { label: 'Produtos', path: '/produtos', icon: LayoutGrid },
+  { label: 'Cupons', path: '/cupons', icon: Tag },
   { label: 'Conta', path: '/perfil', icon: User },
 ] as const;
 
-/** Bottom nav mobile estilo app — fixa, glassmorphism, badge no carrinho. */
+/** Bottom nav mobile no estilo da home tech: barra branca, quatro abas e o
+ *  carrinho num botão central elevado. */
 export const MobileBottomNav = () => {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const { getTotalItems } = useCart();
   const totalItems = getTotalItems();
-  const path = location.pathname;
-  // Esconde onde há barra de ação fixa própria (evita colisão com o CTA):
-  // checkout, admin e a página de detalhes do produto.
-  const hidden = path.startsWith('/admin') || path === '/checkout' || path.startsWith('/produto/');
+
+  // Esconde onde já existe barra de ação fixa própria (evita colisão com o CTA).
+  const hidden =
+    pathname.startsWith('/admin') || pathname === '/checkout' || pathname.startsWith('/produto/');
   if (hidden) return null;
 
+  const isActive = (path: string) => (path === '/' ? pathname === '/' : pathname.startsWith(path));
+
+  const renderTab = (tab: (typeof tabs)[number]) => {
+    const active = isActive(tab.path);
+    const Icon = tab.icon;
+    return (
+      <Link
+        key={tab.path}
+        to={tab.path}
+        aria-current={active ? 'page' : undefined}
+        className="flex flex-col items-center justify-center gap-1 flex-1 py-2 active:scale-95 transition-transform"
+      >
+        <Icon className={`h-5 w-5 transition-colors ${active ? 'text-blue-600' : 'text-slate-400'}`} />
+        <span
+          className={`text-[10px] font-semibold transition-colors ${active ? 'text-blue-600' : 'text-slate-400'}`}
+        >
+          {tab.label}
+        </span>
+      </Link>
+    );
+  };
+
   return (
-    <motion.nav
-      initial={{ y: 80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, delay: 0.4, ease: easing.expo }}
-      className="md:hidden fixed bottom-3 left-3 right-3 z-40 pointer-events-none"
+    <nav
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Navegação mobile"
     >
-      <div className="pointer-events-auto bg-black/70 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] px-2 py-2 flex items-center justify-around">
-        {tabs.map((tab) => {
-          const isActive =
-            tab.path === '/' ? path === '/' : path.startsWith(tab.path);
-          const Icon = tab.icon;
-          return (
-            <Link
-              key={tab.path}
-              to={tab.path}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-colors active:scale-95"
-              aria-current={isActive ? 'page' : undefined}
-            >
-              {isActive && (
-                <motion.span
-                  layoutId="mobile-nav-pill"
-                  className="absolute inset-0 bg-primary/15 border border-primary/30 rounded-2xl"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              <Icon
-                className={`relative h-5 w-5 transition-colors ${isActive ? 'text-primary' : 'text-white/50'}`}
-              />
-              <span
-                className={`relative text-[9px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-primary' : 'text-white/40'}`}
-              >
-                {tab.label}
-              </span>
-              {tab.path === '/produtos' && totalItems > 0 && (
-                <span className="absolute top-1 right-1 bg-primary text-background text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(212,175,55,0.6)]">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+      <div className="relative flex items-stretch px-2">
+        {tabs.slice(0, 2).map(renderTab)}
+
+        {/* Espaçador sob o botão central flutuante */}
+        <div className="w-16 shrink-0" aria-hidden="true" />
+
+        {tabs.slice(2).map(renderTab)}
+
+        <Link
+          to="/checkout"
+          aria-label={`Carrinho com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}`}
+          className="absolute left-1/2 -translate-x-1/2 -top-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-600/30 ring-4 ring-white active:scale-95 transition-all"
+        >
+          <ShoppingBag className="h-6 w-6" />
+          {totalItems > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+              {totalItems > 9 ? '9+' : totalItems}
+            </span>
+          )}
+        </Link>
       </div>
-    </motion.nav>
+    </nav>
   );
 };
