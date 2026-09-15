@@ -28,6 +28,10 @@ export const MobileBottomNav = () => {
 
   const isActive = (path: string) => (path === '/' ? pathname === '/' : pathname.startsWith(path));
 
+  // Páginas de tema escuro: a barra branca padrão destoaria por cima delas.
+  const dark = pathname.startsWith('/fones');
+  const idle = dark ? 'text-white/40' : 'text-slate-400';
+
   const renderTab = (tab: (typeof tabs)[number]) => {
     const active = isActive(tab.path);
     const Icon = tab.icon;
@@ -38,9 +42,9 @@ export const MobileBottomNav = () => {
         aria-current={active ? 'page' : undefined}
         className="flex flex-col items-center justify-center gap-1 flex-1 py-2 active:scale-95 transition-transform"
       >
-        <Icon className={`h-5 w-5 transition-colors ${active ? 'text-blue-600' : 'text-slate-400'}`} />
+        <Icon className={`h-5 w-5 transition-colors ${active ? 'text-blue-600' : idle}`} />
         <span
-          className={`text-[10px] font-semibold transition-colors ${active ? 'text-blue-600' : 'text-slate-400'}`}
+          className={`text-[10px] font-semibold transition-colors ${active ? 'text-blue-600' : idle}`}
         >
           {tab.label}
         </span>
@@ -50,7 +54,9 @@ export const MobileBottomNav = () => {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200"
+      className={`md:hidden fixed bottom-0 inset-x-0 z-40 border-t ${
+        dark ? 'bg-[#0b0b12] border-white/10' : 'bg-white border-slate-200'
+      }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Navegação mobile"
     >
@@ -65,11 +71,15 @@ export const MobileBottomNav = () => {
         <Link
           to="/checkout"
           aria-label={`Carrinho com ${totalItems} ${totalItems === 1 ? 'item' : 'itens'}`}
-          className="absolute left-1/2 -translate-x-1/2 -top-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-600/30 ring-4 ring-white active:scale-95 transition-all"
+          className={`absolute left-1/2 -translate-x-1/2 -top-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-600/30 active:scale-95 transition-all ring-4 ${dark ? 'ring-[#0b0b12]' : 'ring-white'}`}
         >
           <ShoppingBag className="h-6 w-6" />
           {totalItems > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+            <span
+              className={`absolute -top-0.5 -right-0.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ${
+                dark ? 'ring-[#0b0b12]' : 'ring-white'
+              }`}
+            >
               {totalItems > 9 ? '9+' : totalItems}
             </span>
           )}

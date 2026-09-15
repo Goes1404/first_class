@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isApparelCategory, isSneakerCategory, groupForCategory } from '@/lib/catalogGroups';
+import { isApparelCategory, isAudioCategory, isSneakerCategory, groupForCategory } from '@/lib/catalogGroups';
 
 // Estes predicados decidem o recorte das abas /tenis e /roupas, o destino do
 // círculo de categoria na home e o redirecionamento de /produto/:id.
@@ -79,8 +79,37 @@ describe('groupForCategory', () => {
   });
 
   it('devolve null para categoria sem aba dedicada', () => {
-    expect(groupForCategory('Áudio')).toBeNull();
+    expect(groupForCategory('Mouse')).toBeNull();
+    expect(groupForCategory('Smartphone')).toBeNull();
     expect(groupForCategory(undefined)).toBeNull();
     expect(groupForCategory('')).toBeNull();
+  });
+});
+
+describe('isAudioCategory', () => {
+  it.each(['Fones de Ouvido', 'Fone Bluetooth', 'Áudio', 'Audio', 'Headset Gamer', 'Caixa de Som', 'Earbuds'])(
+    'reconhece "%s" como áudio',
+    (categoria) => {
+      expect(isAudioCategory(categoria)).toBe(true);
+    },
+  );
+
+  it.each(['Mouse', 'Smartphone', 'Camisetas', 'Tênis'])('não confunde "%s" com áudio', (categoria) => {
+    expect(isAudioCategory(categoria)).toBe(false);
+  });
+});
+
+describe('hasPurchasePage', () => {
+  // Só calçado e roupa têm tela de compra própria; áudio segue em /produto/:id,
+  // e é isso que o redirecionamento consulta.
+  it('marca calçado e roupa, mas não áudio', () => {
+    expect(groupForCategory('Tênis')?.hasPurchasePage).toBe(true);
+    expect(groupForCategory('Camisetas')?.hasPurchasePage).toBe(true);
+    expect(groupForCategory('Fones de Ouvido')?.hasPurchasePage).toBe(false);
+  });
+
+  it('manda áudio para /fones', () => {
+    expect(groupForCategory('Fones de Ouvido')?.slug).toBe('fones');
+    expect(groupForCategory('Áudio')?.slug).toBe('fones');
   });
 });

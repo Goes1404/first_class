@@ -289,7 +289,7 @@ const ProductDetails = () => {
   useEffect(() => {
     // Calçado redireciona para /tenis/<id>, que registra a visualização lá —
     // contar aqui também duplicaria a métrica.
-    if (product?.id && !groupForCategory(product.category)) trackProductView(product.id);
+    if (product?.id && !groupForCategory(product.category)?.hasPurchasePage) trackProductView(product.id);
   }, [product?.id, product?.category, trackProductView]);
 
   if (isLoading) return <LoadingSkeleton />;
@@ -297,7 +297,7 @@ const ProductDetails = () => {
   // Calçado e roupa têm tela de compra própria (grade de tamanhos, cores).
   // Links antigos de /produto/<id> caem lá.
   const group = product && groupForCategory(product.category);
-  if (product && group) {
+  if (product && group?.hasPurchasePage) {
     return <Navigate to={`/${group.slug}/${product.id}`} replace />;
   }
 

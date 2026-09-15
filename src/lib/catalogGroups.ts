@@ -10,6 +10,8 @@ const SNEAKER_RE = /t[eê]nis|cal[çc]ad|sapato|sneaker|chuteira|sand[aá]lia|ch
 
 // `cal[çc]a(?!d)` casa "calça" e "calças" mas não "calçado" — sem isso todo
 // calçado seria classificado como roupa também.
+const AUDIO_RE = /fone|headphone|headset|earbud|[aá]udio|caixa de som|speaker|soundbar/i;
+
 const APPAREL_RE =
   /camiseta|camisa|blusa|moletom|jaqueta|casaco|agasalho|cal[çc]a(?!d)|bermuda|short|vestido|saia|regata|roupa|su[eé]ter|cardig|macac[ãa]o|polo|top\b|conjunto/i;
 
@@ -19,9 +21,13 @@ export const isSneakerCategory = (category?: string | null) => SNEAKER_RE.test(c
 export const isApparelCategory = (category?: string | null) =>
   !isSneakerCategory(category) && APPAREL_RE.test(category ?? '');
 
+export const isAudioCategory = (category?: string | null) => AUDIO_RE.test(category ?? '');
+
 export interface CollectionGroup {
-  /** Prefixo das rotas: /<slug> e /<slug>/:id */
-  slug: 'tenis' | 'roupas';
+  /** Prefixo das rotas: /<slug> e, quando houver, /<slug>/:id */
+  slug: 'tenis' | 'roupas' | 'fones';
+  /** Se o grupo tem tela de compra própria — só esses redirecionam /produto/:id. */
+  hasPurchasePage: boolean;
   /** Título da barra superior. */
   title: string;
   /** Nome usado nas métricas de página. */
@@ -43,6 +49,7 @@ export const SNEAKERS: CollectionGroup = {
   seoTitle: 'Tênis | JR Acessórios',
   emptyTitle: 'Nenhum tênis cadastrado ainda',
   emptyHint: 'Cadastre produtos numa categoria de calçado para eles aparecerem aqui.',
+  hasPurchasePage: true,
   matches: isSneakerCategory,
 };
 
@@ -55,9 +62,29 @@ export const APPAREL: CollectionGroup = {
   seoTitle: 'Roupas | JR Acessórios',
   emptyTitle: 'Nenhuma peça cadastrada ainda',
   emptyHint: 'Cadastre produtos numa categoria de roupa para eles aparecerem aqui.',
+  hasPurchasePage: true,
   matches: isApparelCategory,
+};
+
+export const AUDIO: CollectionGroup = {
+  slug: 'fones',
+  title: 'Áudio',
+  analyticsKey: 'fones',
+  headline: ['OUÇA', 'CADA DETALHE.'],
+  tagline: 'Fones e caixas de som escolhidos pelo que importa: o som.',
+  seoTitle: 'Fones de ouvido | JR Acessórios',
+  emptyTitle: 'Nenhum fone cadastrado ainda',
+  emptyHint: 'Cadastre produtos numa categoria de áudio para eles aparecerem aqui.',
+  hasPurchasePage: false,
+  matches: isAudioCategory,
 };
 
 /** Grupo dono de uma categoria, ou null quando ela não pertence a nenhum. */
 export const groupForCategory = (category?: string | null): CollectionGroup | null =>
-  isSneakerCategory(category) ? SNEAKERS : isApparelCategory(category) ? APPAREL : null;
+  isSneakerCategory(category)
+    ? SNEAKERS
+    : isApparelCategory(category)
+      ? APPAREL
+      : isAudioCategory(category)
+        ? AUDIO
+        : null;

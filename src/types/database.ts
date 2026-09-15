@@ -1,3 +1,8 @@
+export interface ProductSpec {
+  label: string;
+  value: string;
+}
+
 export interface ProductColor {
   name: string;
   hex: string;
@@ -19,6 +24,8 @@ export interface Product {
   sizes?: string[];
   /** Cores disponíveis, exibidas como swatches na tela de compra. */
   colors?: ProductColor[];
+  /** Ficha técnica, exibida na página de fones. */
+  specs?: ProductSpec[];
   stock: number;
   is_featured: boolean;
   weight?: number;  // kg — usado no cálculo de frete

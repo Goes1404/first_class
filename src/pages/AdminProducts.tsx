@@ -79,6 +79,7 @@ const AdminProducts = () => {
     brand_logo_url: '',
     sizes: '',
     colors: [] as { name: string; hex: string }[],
+    specs: [] as { label: string; value: string }[],
     stock: '999',
     is_featured: false,
     weight: '',
@@ -138,6 +139,7 @@ const AdminProducts = () => {
       brand_logo_url: '',
       sizes: '',
       colors: [],
+      specs: [],
       stock: '999',
       is_featured: false,
       weight: '',
@@ -163,6 +165,7 @@ const AdminProducts = () => {
       brand_logo_url: product.brand_logo_url || '',
       sizes: (product.sizes || []).join(', '),
       colors: product.colors || [],
+      specs: product.specs || [],
       stock: product.stock.toString(),
       is_featured: product.is_featured,
       weight: product.weight?.toString() || '',
@@ -205,6 +208,7 @@ const AdminProducts = () => {
       brand_logo_url: formData.brand_logo_url.trim() || null,
       sizes: formData.sizes.split(',').map(t => t.trim()).filter(Boolean),
       colors: formData.colors.filter(c => c.name.trim() && c.hex.trim()),
+      specs: formData.specs.filter(sp => sp.label.trim() && sp.value.trim()),
       stock,
       is_featured: formData.is_featured,
       weight: parseFloat(formData.weight) || 0.3,
@@ -464,6 +468,51 @@ const AdminProducts = () => {
                     >
                       + Adicionar cor
                     </button>
+                  </div>
+                  <div className="space-y-4 md:col-span-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Ficha técnica</Label>
+                    {formData.specs.map((sp, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <Input
+                          value={sp.label}
+                          onChange={(e) => {
+                            const specs = [...formData.specs];
+                            specs[i] = { ...specs[i], label: e.target.value };
+                            setFormData({ ...formData, specs });
+                          }}
+                          className="bg-white/5 border-white/10 h-11 rounded-xl w-2/5"
+                          placeholder="Conexão"
+                        />
+                        <Input
+                          value={sp.value}
+                          onChange={(e) => {
+                            const specs = [...formData.specs];
+                            specs[i] = { ...specs[i], value: e.target.value };
+                            setFormData({ ...formData, specs });
+                          }}
+                          className="bg-white/5 border-white/10 h-11 rounded-xl flex-1"
+                          placeholder="Bluetooth 5.3"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, specs: formData.specs.filter((_, j) => j !== i) })}
+                          aria-label={`Remover ${sp.label || 'especificação'}`}
+                          className="h-11 px-3 rounded-xl border border-white/10 text-white/40 hover:text-white/80 text-xs"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, specs: [...formData.specs, { label: '', value: '' }] })}
+                      className="h-11 px-4 rounded-xl border border-white/10 text-white/50 hover:text-white/80 text-xs font-bold uppercase tracking-widest"
+                    >
+                      + Adicionar especificação
+                    </button>
+                    <p className="text-[10px] text-white/25">
+                      Aparece como tabela na página de fones (/fones), no produto em destaque.
+                    </p>
                   </div>
                 </div>
                 
