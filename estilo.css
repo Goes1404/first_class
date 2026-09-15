@@ -1,0 +1,199 @@
+/* Lojaju - estilos da versao estatica */
+
+:root {
+    --cor-fundo: #f8fafc;
+    --cor-superficie: #ffffff;
+    --cor-texto: #0f172a;
+    --cor-texto-suave: #64748b;
+    --cor-borda: #e2e8f0;
+    --cor-destaque: #e11d48;
+    --cor-destaque-escura: #be123c;
+    --raio: 12px;
+    --sombra: 0 1px 3px rgba(15, 23, 42, .08), 0 8px 24px rgba(15, 23, 42, .06);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    line-height: 1.5;
+}
+
+/* ---------- Cabecalho ---------- */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--cor-superficie);
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: var(--cor-texto);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--cor-destaque) !important;
+}
+
+.nav-links,
+.nav-login {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-links a,
+.nav-login a {
+    font-size: .95rem;
+    color: var(--cor-texto-suave);
+}
+
+.nav-links a:hover,
+.nav-login a:hover {
+    color: var(--cor-destaque);
+}
+
+.btn-login {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--cor-destaque);
+    color: #fff !important;
+    font-weight: 600;
+}
+
+.btn-login:hover {
+    background: var(--cor-destaque-escura);
+}
+
+/* ---------- Banner ---------- */
+
+.banner {
+    max-width: 1100px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+}
+
+.banner::before {
+    content: "Novidades da temporada";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 24px;
+    border-radius: var(--raio);
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #fff;
+    font-size: clamp(1.25rem, 4vw, 2rem);
+    font-weight: 700;
+    text-align: center;
+}
+
+/* ---------- Produtos ---------- */
+
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 16px 64px;
+}
+
+main h2 {
+    margin: 0 0 24px;
+    font-size: 1.75rem;
+}
+
+.vitrine-produtos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+}
+
+.produto-single {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background: var(--cor-superficie);
+    box-shadow: var(--sombra);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.produto-single:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
+}
+
+.produto-single img {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--cor-fundo);
+}
+
+.produto-single h4 {
+    margin: 16px 0 4px;
+    font-size: 1.05rem;
+}
+
+.produto-single p {
+    margin: 0 0 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--cor-destaque);
+}
+
+.btn-comprar {
+    margin-top: auto;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--cor-texto);
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-comprar:hover {
+    background: var(--cor-destaque);
+}
+
+/* ---------- Rodape ---------- */
+
+footer {
+    border-top: 1px solid var(--cor-borda);
+    background: var(--cor-superficie);
+}
+
+footer p {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    color: var(--cor-texto-suave);
+    font-size: .9rem;
+    text-align: center;
+}

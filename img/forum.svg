@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Adidas Forum">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dcfce7"/>
+      <stop offset="1" stop-color="#86efac"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+  <path d="M70 250c30-14 58-38 86-62 14-12 30-20 48-20 16 0 26 8 34 20 10 16 26 26 46 30 24 5 36 14 36 28v18H70z" fill="#ffffff" opacity=".9"/>
+  <path d="M70 264h250v20H70z" fill="#0f172a" opacity=".22"/>
+  <text x="200" y="344" font-family="system-ui, sans-serif" font-size="26" font-weight="600" fill="#0f172a" opacity=".65" text-anchor="middle">Adidas Forum</text>
+</svg>
