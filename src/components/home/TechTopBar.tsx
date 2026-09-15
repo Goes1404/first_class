@@ -8,6 +8,10 @@ import { Pop } from '@/components/animations/Pop';
 const MENU_LINKS = [
   { label: 'Início', to: '/' },
   { label: 'Produtos', to: '/produtos' },
+  { label: 'Eletrônicos', to: '/eletronicos' },
+  { label: 'Tênis', to: '/tenis' },
+  { label: 'Roupas', to: '/roupas' },
+  { label: 'Fones', to: '/fones' },
   { label: 'Cupons', to: '/cupons' },
   { label: 'Favoritos', to: '/favoritos' },
   { label: 'Meus pedidos', to: '/pedidos' },
@@ -41,7 +45,7 @@ export const TechTopBar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
       <div className="mx-auto max-w-5xl px-4">
         {/* ─── Linha 1: menu · logo · ações ─── */}
         <div className="h-16 grid grid-cols-[auto_1fr_auto] items-center gap-3">
@@ -55,15 +59,10 @@ export const TechTopBar: React.FC = () => {
           </button>
 
           <Link to="/" className="flex flex-col items-center leading-none min-w-0">
-            <span className="flex items-center gap-1.5">
-              <Zap className="h-5 w-5 text-blue-600 fill-blue-600 shrink-0" />
-              <span className="font-extrabold tracking-tight text-slate-900 text-lg sm:text-xl truncate">
-                {STORE.name}
-              </span>
+            <span className="text-[10px] sm:text-[11px] font-extrabold tracking-[0.26em] text-slate-900 uppercase truncate">
+              {STORE.name}
             </span>
-            <span className="text-[9px] sm:text-[10px] font-semibold tracking-[0.25em] text-blue-600 mt-1">
-              ACESSÓRIOS · TECNOLOGIA
-            </span>
+            <span className="mt-1 text-[11px] font-medium text-slate-500">Acessórios · Tecnologia</span>
           </Link>
 
           <div className="flex items-center gap-1">

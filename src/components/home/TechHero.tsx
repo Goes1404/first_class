@@ -1,163 +1,192 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { preloadProducts } from "@/lib/preloadRoutes";
-import { AnimatePresence, motion } from "framer-motion";
-import { easing } from "@/lib/motion";
-
-interface Slide {
-  eyebrow: string;
-  title: string;
-  highlight: string;
-  text: string;
-  cta: string;
-  to: string;
-}
-
-const SLIDES: Slide[] = [
-  {
-    eyebrow: "Novidades",
-    title: "TECNOLOGIA QUE",
-    highlight: "ACOMPANHA VOCÊ.",
-    text: "Acessórios e eletrônicos escolhidos para o trabalho, o lazer e o dia a dia.",
-    cta: "Comprar agora",
-    to: "/produtos",
-  },
-  {
-    eyebrow: "Entrega expressa",
-    title: "RECEBA HOJE",
-    highlight: "EM OSASCO/SP.",
-    text: "Pedidos aprovados até as 16h saem para entrega no mesmo dia.",
-    cta: "Ver produtos",
-    to: "/produtos",
-  },
-  {
-    eyebrow: "Pagamento",
-    title: "5% DE DESCONTO",
-    highlight: "PAGANDO NO PIX.",
-    text: "Aprovação imediata. No cartão, parcele em até 10×.",
-    cta: "Ver ofertas",
-    to: "/produtos",
-  },
-];
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, ImageOff } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useProducts } from '@/hooks/useProducts';
+import { preloadProducts, preloadElectronics } from '@/lib/preloadRoutes';
+import { easing, spring } from '@/lib/motion';
+import { groupForCategory } from '@/lib/catalogGroups';
 
 const AUTOPLAY_MS = 6000;
+const SPOTLIGHT_MAX = 3;
 
+const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/** Rota do produto: a ficha própria da aba quando ela existe, senão a genérica. */
+const productPath = (id: string, category: string) => {
+  const g = groupForCategory(category);
+  return g?.hasPurchasePage ? `/${g.slug}/${id}` : `/produto/${id}`;
+};
+
+/**
+ * Hero da home no padrão Vitrine: título editorial à esquerda e, à direita,
+ * os produtos em destaque se revezando como holofote. Nada de slide com
+ * texto genérico — o que gira é o produto de verdade.
+ */
 export const TechHero: React.FC = () => {
+  const { data: products } = useProducts();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
+  const spotlight = useMemo(() => {
+    if (!products?.length) return [];
+    const withImage = products.filter((p) => p.image);
+    const featured = withImage.filter((p) => p.is_featured);
+    return (featured.length ? featured : withImage).slice(0, SPOTLIGHT_MAX);
+  }, [products]);
+
   const go = useCallback(
-    (i: number) =>
-      setActive(((i % SLIDES.length) + SLIDES.length) % SLIDES.length),
-    [],
+    (i: number) => setActive(spotlight.length ? ((i % spotlight.length) + spotlight.length) % spotlight.length : 0),
+    [spotlight.length],
   );
 
   // Autoplay: pausa no hover/foco e respeita quem prefere menos movimento.
   useEffect(() => {
-    const reduced = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (paused || reduced) return;
-    const t = setInterval(
-      () => setActive((i) => (i + 1) % SLIDES.length),
-      AUTOPLAY_MS,
-    );
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (paused || reduced || spotlight.length < 2) return;
+    const t = setInterval(() => setActive((i) => (i + 1) % spotlight.length), AUTOPLAY_MS);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, spotlight.length]);
 
-  const slide = SLIDES[active];
+  const current = spotlight[active] ?? spotlight[0];
 
   return (
     <section
-      className="pt-4"
+      className="relative pt-4 sm:pt-10"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
-      aria-roledescription="carrossel"
       aria-label="Destaques da loja"
     >
-      <div className="mx-auto max-w-5xl px-4">
-        <div className="relative overflow-hidden rounded-2xl bg-[#0b1b3a] min-h-[260px] sm:min-h-[300px]">
-          {/* Brilhos de fundo */}
-          <div
-            className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-500/25 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-cyan-400/15 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-0 opacity-[0.07]"
-            aria-hidden="true"
-            style={{
-              backgroundImage:
-                "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-              backgroundSize: "36px 36px",
-            }}
-          />
+      <div className="relative mx-auto max-w-5xl px-4 sm:grid sm:grid-cols-2 sm:items-center sm:gap-8">
+        <div
+          className="pointer-events-none absolute -right-16 -top-8 h-[300px] w-[300px] rounded-full sm:right-0 sm:top-0 sm:h-[400px] sm:w-[400px]"
+          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.26) 0%, rgba(255,255,255,0) 66%)' }}
+          aria-hidden="true"
+        />
 
-          <div className="relative z-10 p-6 sm:p-8 max-w-md">
-            {/* O texto do slide entra pela direita e sai pela esquerda. */}
-            <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, x: 18 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -18 }}
-              transition={{ duration: 0.32, ease: easing.smooth }}
+        <div className="relative max-w-[224px] sm:max-w-none">
+          <motion.span
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: easing.smooth }}
+            className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-[0.22em] text-blue-600"
+          >
+            <span className="block h-0.5 w-[18px] rounded bg-blue-600" aria-hidden="true" />
+            NOVIDADES
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease: easing.smooth }}
+            className="mt-3 text-[38px] leading-[0.94] font-extrabold tracking-[-0.05em] text-slate-900 sm:text-[62px]"
+          >
+            <span className="block">Tecnologia</span>
+            <span className="block">para o seu</span>
+            <span
+              className="block text-[48px] leading-[0.95] tracking-[-0.02em] text-blue-600 sm:text-[76px]"
+              style={{ fontFamily: "'Instrument Serif', Georgia, 'Times New Roman', serif", fontStyle: 'italic', fontWeight: 400 }}
             >
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">
-              {slide.eyebrow}
+              dia a dia.
             </span>
-            <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold leading-tight text-white">
-              {slide.title}
-              <br />
-              <span className="text-blue-400">{slide.highlight}</span>
-            </h1>
-            <p className="mt-3 text-sm text-slate-300 leading-relaxed">
-              {slide.text}
-            </p>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.22, ease: easing.smooth }}
+            className="mt-4 max-w-[200px] text-[13px] leading-relaxed text-slate-500 sm:max-w-sm sm:text-sm"
+          >
+            Acessórios e eletrônicos para o trabalho e o lazer. Pedidos até as 16h saem no mesmo dia em Osasco.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3, ease: easing.smooth }}
+            className="mt-5 flex flex-wrap items-center gap-2.5"
+          >
             <Link
-              to={slide.to}
+              to="/produtos"
               onPointerEnter={preloadProducts}
               onTouchStart={preloadProducts}
-              className="mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-slate-900 px-5 text-sm font-bold text-white hover:bg-slate-800 transition-colors"
             >
-              {slide.cta}
-              <ArrowRight className="h-4 w-4" />
+              Comprar agora <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-            </motion.div>
-            </AnimatePresence>
+            <Link
+              to="/eletronicos"
+              onPointerEnter={preloadElectronics}
+              onTouchStart={preloadElectronics}
+              className="inline-flex h-11 items-center rounded-full px-3 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              Ver eletrônicos
+            </Link>
+          </motion.div>
+        </div>
 
-            {/* Indicadores — em fluxo, logo abaixo do CTA, para nunca cobri-lo.
-                O botão preserva os 44px de alvo de toque (WCAG 2.5.5, regra
-                global em index.css) e a barrinha visual vive dentro dele. */}
-            <div className="mt-1 flex items-center gap-1">
-              {SLIDES.map((s, i) => (
+        {/* Holofote: produto em destaque flutuando; no celular ele sobrepõe o título. */}
+        <div className="pointer-events-none absolute right-0 top-3 h-[230px] w-[136px] sm:pointer-events-auto sm:relative sm:right-auto sm:top-auto sm:h-[400px] sm:w-auto">
+          <div className="relative flex h-full items-center justify-center">
+            <AnimatePresence mode="wait" initial={false}>
+              {current ? (
+                <motion.img
+                  key={current.id}
+                  src={current.image}
+                  alt=""
+                  aria-hidden="true"
+                  initial={{ opacity: 0, y: 24, rotate: -9 }}
+                  animate={{ opacity: 1, y: [0, -10, 0], rotate: -9 }}
+                  exit={{ opacity: 0, y: -16, rotate: -9 }}
+                  transition={{ opacity: { duration: 0.45 }, y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } }}
+                  className="max-h-full max-w-full object-contain drop-shadow-[0_32px_36px_rgba(15,23,42,0.38)] sm:max-h-[340px] sm:max-w-[280px]"
+                />
+              ) : (
+                <ImageOff className="h-10 w-10 text-slate-200" aria-hidden="true" />
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Legenda do holofote: nome, preço e os pontinhos para trocar. */}
+      {current && (
+        <div className="mx-auto mt-3 flex max-w-5xl items-center justify-between gap-3 px-4 sm:-mt-6">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={current.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: easing.smooth }}
+            >
+              <Link
+                to={productPath(current.id, current.category)}
+                className="inline-flex h-10 max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white pl-3.5 pr-3 text-xs font-semibold text-slate-900 shadow-sm hover:border-slate-400 transition-colors"
+              >
+                <span className="block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" aria-hidden="true" />
+                <span className="truncate">{current.name}</span>
+                <span className="shrink-0 text-slate-400">·</span>
+                <span className="shrink-0 font-extrabold">{brl(current.price)}</span>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-blue-600" aria-hidden="true" />
+              </Link>
+            </motion.div>
+          </AnimatePresence>
+
+          {spotlight.length > 1 && (
+            <div className="flex shrink-0 items-center" role="tablist" aria-label="Produtos em destaque">
+              {spotlight.map((p, i) => (
                 <button
-                  key={s.eyebrow}
+                  key={p.id}
                   type="button"
+                  role="tab"
+                  aria-selected={i === active}
+                  aria-label={`Destaque ${i + 1}: ${p.name}`}
                   onClick={() => go(i)}
-                  aria-label={`Ir para o destaque ${i + 1}: ${s.eyebrow}`}
-                  aria-current={i === active}
-                  className="group h-11 px-1 flex items-center"
+                  className="group flex h-11 items-center px-1"
                 >
-                  <span
-                    className={`block h-1.5 rounded-full transition-all ${
-                      i === active
-                        ? "w-6 bg-blue-400"
-                        : "w-1.5 bg-white/40 group-hover:bg-white/70"
-                    }`}
+                  <motion.span
+                    animate={{ width: i === active ? 24 : 6 }}
+                    transition={spring.snappy}
+                    className={`block h-1.5 rounded-full ${i === active ? 'bg-blue-600' : 'bg-slate-300 group-hover:bg-slate-400'}`}
                   />
                 </button>
               ))}
             </div>
-          </div>
+          )}
         </div>
-      </div>
+      )}
     </section>
   );
 };

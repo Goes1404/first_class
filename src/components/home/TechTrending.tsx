@@ -5,7 +5,7 @@ import { Product } from '@/types/database';
 import { useProducts } from '@/hooks/useProducts';
 import { useProductRatings } from '@/hooks/useProductRatings';
 import { preloadProducts } from '@/lib/preloadRoutes';
-import { TechProductCard, TechProductCardSkeleton } from './TechProductCard';
+import { TechProductCard, TechProductCardSkeleton, CARD_TINTS } from './TechProductCard';
 import { Stagger, StaggerItem } from '@/components/animations/Stagger';
 import type { BadgeKind } from './techTheme';
 
@@ -34,20 +34,20 @@ export const TechTrending: React.FC = () => {
   }, [products]);
 
   return (
-    <section className="pt-8" aria-labelledby="trending-title">
+    <section className="pt-9" aria-labelledby="trending-title">
       <div className="mx-auto max-w-5xl px-4">
-        <div className="flex items-center justify-between gap-4 mb-4">
-          <h2 id="trending-title" className="text-lg font-extrabold text-slate-900">
+        <div className="flex items-baseline justify-between gap-4 mb-3">
+          <h2 id="trending-title" className="text-xl font-extrabold tracking-[-0.03em] text-slate-900">
             Em alta na loja
           </h2>
           <Link
             to="/produtos"
             onPointerEnter={preloadProducts}
             onTouchStart={preloadProducts}
-            className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+            className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
           >
             Ver todos
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -78,7 +78,7 @@ export const TechTrending: React.FC = () => {
           <Stagger className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {shown.map((p, i) => (
               <StaggerItem key={p.id}>
-                <TechProductCard product={p} rating={ratings?.[p.id]} badge={badgeFor(p, i)} />
+                <TechProductCard product={p} rating={ratings?.[p.id]} badge={badgeFor(p, i)} tint={CARD_TINTS[i % CARD_TINTS.length]} />
               </StaggerItem>
             ))}
           </Stagger>

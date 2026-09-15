@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, MessageCircle, Instagram } from 'lucide-react';
+import { MessageCircle, Instagram } from 'lucide-react';
 import { STORE } from '@/config/store';
 import { WHATSAPP_LINK } from '@/config/constants';
 
@@ -15,9 +15,9 @@ export const TechFooter: React.FC = () => (
   <footer className="mt-10 bg-white border-t border-slate-200">
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <span className="flex items-center gap-1.5 font-extrabold text-slate-900">
-          <Zap className="h-5 w-5 text-blue-600 fill-blue-600" aria-hidden="true" />
-          {STORE.name}
+        <span className="flex flex-col leading-none">
+          <span className="text-[11px] font-extrabold tracking-[0.26em] text-slate-900 uppercase">{STORE.name}</span>
+          <span className="mt-1 text-[11px] font-medium text-slate-500">Acessórios · Tecnologia</span>
         </span>
         <div className="flex items-center gap-2">
           <a

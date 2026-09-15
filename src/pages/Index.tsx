@@ -9,8 +9,8 @@ import { TechPromo } from '@/components/home/TechPromo';
 import { TechFooter } from '@/components/home/TechFooter';
 
 /**
- * Home reestruturada — layout de app de e-commerce: barra superior com busca,
- * hero em carrossel, categorias, vitrine "em alta" e banner de oferta.
+ * Home no padrão Vitrine: barra superior com busca, hero editorial com os
+ * destaques como holofote, coleções com foto, vitrine "em alta" e banner de oferta.
  *
  * O visual claro/azul vive nos componentes de `components/home` e não toca os
  * tokens globais, então as demais páginas seguem com o tema atual.
@@ -21,7 +21,7 @@ const Index: React.FC = () => {
 
   return (
     // Fundo claro explícito no wrapper: impede que o tema escuro global vaze.
-    <div className="min-h-screen bg-slate-100 pb-28">
+    <div className="min-h-screen overflow-x-clip bg-white pb-28">
       <SEO />
       <TechTopBar />
 
